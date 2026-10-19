@@ -2,79 +2,42 @@
 """
 Whale Tracking Analysis - Pareto Principle (Top 20% generating 80% of debit)
 """
-from pathlib import Path
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
-
-
 import csv
-import json
 import sys
-from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
+from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-from currency_converter import convert_to_php, get_country
-
-FOLDER = Path(WORKSPACE / "data" / "raw")
-REPORT_DIR = Path(WORKSPACE / "output")
-REPORT_DIR.mkdir(exist_ok=True)
-PROGRESS_FILE = REPORT_DIR / "progress.json"
-
-
-def update_progress(stage, message, progress=None, details=None):
-    data = {
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'stage': stage,
-        'message': message,
-        'progress': progress,
-        'details': details or {}
-    }
-    with open(PROGRESS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def get_all_csv_files():
-    return sorted(FOLDER.glob("*.csv"))
-
-
-def safe_float(val):
-    if not val:
-        return 0.0
-    try:
-        return float(val)
-    except (ValueError, TypeError):
-        return 0.0
+_SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
+import workspace
+from ingest.io import iter_raw_rows
 
 
 def main():
     print("=" * 60)
     print("WHALE TRACKING ANALYSIS")
     print("=" * 60)
-    print(f"Target: {FOLDER}")
-    print(f"Output: {REPORT_DIR}")
+    print(f"Target: {workspace.RAW_DIR}")
+    print(f"Output: {workspace.OUTPUT_DIR}")
 
-    update_progress('whale_tracking', 'Starting whale tracking analysis...', 0)
+    workspace.OUTPUT_DIR.mkdir(exist_ok=True)
+    workspace.update_progress('whale_tracking', 'Starting whale tracking analysis...', 0)
 
-    if not FOLDER.exists():
-        print(f"ERROR: Folder not found: {FOLDER}")
-        update_progress('error', 'Folder not found', 0)
+    if not workspace.RAW_DIR.exists():
+        print(f"ERROR: Folder not found: {workspace.RAW_DIR}")
+        workspace.update_progress('error', 'Folder not found', 0)
         return 1
 
-    csv_files = get_all_csv_files()
+    csv_files = sorted(workspace.RAW_DIR.glob("*.csv"))
     print(f"Found {len(csv_files)} CSV files")
-    update_progress('whale_tracking', f'Found {len(csv_files)} CSV files', 5, {'total_files': len(csv_files)})
+    workspace.update_progress('whale_tracking', f'Found {len(csv_files)} CSV files', 5,
+                              {'total_files': len(csv_files)})
 
     if len(csv_files) == 0:
         print("ERROR: No CSV files found!")
-        update_progress('error', 'No CSV files found', 0)
+        workspace.update_progress('error', 'No CSV files found', 0)
         return 1
 
     player_debit = defaultdict(float)
@@ -82,41 +45,34 @@ def main():
     player_sessions = defaultdict(list)
     player_countries = defaultdict(set)
 
-    for file_idx, file_path in enumerate(csv_files, 1):
-        try:
-            with open(file_path, 'r', encoding='utf-8-sig') as f:
-                reader = csv.DictReader(f)
+    rows_processed = 0
+    for row in iter_raw_rows(workspace.RAW_DIR):
+        rows_processed += 1
 
-                for row in reader:
-                    player_id = row.get('player_id', '').strip()
-                    if not player_id:
-                        continue
-
-                    debit = safe_float(row.get('debit_amount', 0))
-                    currency = row.get('currency', '').strip()
-                    timestamp_str = row.get('formatted_debit_at', '').strip()
-
-                    debit_php = convert_to_php(debit, currency, timestamp_str)
-                    country = get_country(currency)
-
-                    player_debit[player_id] += debit_php
-                    player_bets[player_id] += 1
-                    player_countries[player_id].add(currency)
-
-                    if timestamp_str:
-                        try:
-                            ts = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
-                            player_sessions[player_id].append(ts)
-                        except ValueError:
-                            pass
-
-        except Exception as e:
-            print(f"    Error: {e}")
+        player_id = (row.get('player_id') or '').strip()
+        if not player_id:
             continue
 
-        pct = 5 + int((file_idx / len(csv_files)) * 40)
-        update_progress('whale_tracking', f'Processing file {file_idx}/{len(csv_files)}...', pct,
-                        {'total_files': len(csv_files), 'processed': file_idx})
+        debit_php = row['debit_php']
+        currency = (row.get('currency') or '').strip()
+        timestamp_str = (row.get('formatted_debit_at') or '').strip()
+
+        player_debit[player_id] += debit_php
+        player_bets[player_id] += 1
+        player_countries[player_id].add(currency)
+
+        if timestamp_str:
+            try:
+                ts = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+                player_sessions[player_id].append(ts)
+            except ValueError:
+                pass
+
+        if rows_processed % 25000 == 0:
+            pct = 5 + min(40, int((rows_processed / 100000) * 40))
+            workspace.update_progress('whale_tracking',
+                                      f'Processing rows ({rows_processed})...', pct,
+                                      {'rows_processed': rows_processed})
 
     total_debit = sum(player_debit.values())
     sorted_players = sorted(player_debit.items(), key=lambda x: x[1], reverse=True)
@@ -135,8 +91,8 @@ def main():
 
     whales = [(pid, debit) for pid, debit in sorted_players if debit >= whale_threshold_80]
 
-    update_progress('whale_tracking', 'Analyzing whale behavior...', 50,
-                    {'total_players': len(player_debit), 'whales': len(whales)})
+    workspace.update_progress('whale_tracking', 'Analyzing whale behavior...', 50,
+                              {'total_players': len(player_debit), 'whales': len(whales)})
 
     whale_sessions = []
     for player_id, debit in whales[:20]:
@@ -162,17 +118,17 @@ def main():
             })
 
     if whale_sessions:
-        output_file = REPORT_DIR / "whale_analysis.csv"
+        output_file = workspace.OUTPUT_DIR / "whale_analysis.csv"
         with open(output_file, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=['player_id', 'total_debit', 'total_bets',
                                                    'avg_session_hours', 'session_count', 'countries'])
             writer.writeheader()
             writer.writerows(whale_sessions)
 
-    update_progress('whale_tracking', 'Whale tracking complete!', 100,
-                    {'total_players': len(player_debit), 'whales': len(whales)})
+    workspace.update_progress('whale_tracking', 'Whale tracking complete!', 100,
+                              {'total_players': len(player_debit), 'whales': len(whales)})
 
-    print(f"\n[OK] Whale analysis: {REPORT_DIR / 'whale_analysis.csv'}")
+    print(f"\n[OK] Whale analysis: {workspace.OUTPUT_DIR / 'whale_analysis.csv'}")
     print(f"     Found {len(whales)} whales ({whale_count_80} players = 80% of debit)")
     return 0
 

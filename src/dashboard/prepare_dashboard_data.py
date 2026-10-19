@@ -2,11 +2,6 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
 
 import csv
 import json
@@ -16,13 +11,10 @@ from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "ingest"))
-
 from player_index import PlayerIndexEntry  # noqa: E402
 
-REPORT_DIR = Path(WORKSPACE / "output")
 
-
-def prepare_dashboard_data(report_dir: Path = REPORT_DIR) -> dict:
+def prepare_dashboard_data(report_dir: Path = WORKSPACE / "output") -> dict:
     # 1. Whale Analysis
     whales = []
     with open(report_dir / "whale_analysis.csv", "r", encoding="utf-8") as f:
@@ -261,7 +253,7 @@ def prepare_dashboard_data(report_dir: Path = REPORT_DIR) -> dict:
 
 
 if __name__ == "__main__":
-    out_json = REPORT_DIR / "dashboard_data.json"
+    out_json = WORKSPACE / "output" / "dashboard_data.json"
     master_data = prepare_dashboard_data()
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(master_data, f, indent=2)

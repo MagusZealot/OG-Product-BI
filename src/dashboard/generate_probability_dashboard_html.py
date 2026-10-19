@@ -4,18 +4,12 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
 
 
 import json
 import sys
 from pathlib import Path
 
-WORKSPACE = Path(WORKSPACE)
 sys.path.insert(0, str(SCRIPT_DIR))
 from render import render_dashboard
 
