@@ -7,31 +7,25 @@ merged all_players_dossiers JSON is deliberately opt-in.
 """
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
+import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import csv
+import io
 import json
 import os
-import sys
 import time
 from array import array
 from collections import Counter, defaultdict, deque
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from datetime import datetime, timezone
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
 from currency_converter import convert_to_php, CURRENCY_COUNTRY
+from workspace import RAW_DIR, OUTPUT_DIR
+from player_index import PlayerIndexEntry
 
-FOLDER = Path(WORKSPACE / "data" / "raw")
-REPORT_DIR = Path(WORKSPACE / "output")
 CHUNK_SIZE = 1000
 MAX_WORKERS = min(max(os.cpu_count() or 2, 2), 4)
 WRITE_MONOLITH = os.environ.get("BUILD_DOSSIER_MONOLITH", "0").strip().lower() in {"1", "true", "yes"}
@@ -50,11 +44,11 @@ def norm_device(value):
 
 def load_refs():
     whales, chasers = {}, {}
-    for row in csv.DictReader(open(REPORT_DIR / "whale_analysis.csv", encoding="utf-8", newline="")):
+    for row in csv.DictReader(open(OUTPUT_DIR / "whale_analysis.csv", encoding="utf-8", newline="")):
         whales[row["player_id"]] = {
             "avg_session_hours": float(row["avg_session_hours"]),
         }
-    for row in csv.DictReader(open(REPORT_DIR / "chaser_detection.csv", encoding="utf-8", newline="")):
+    for row in csv.DictReader(open(OUTPUT_DIR / "chaser_detection.csv", encoding="utf-8", newline="")):
         chasers[row["player_id"]] = {
             "spike_multiplier": float(row["spike_multiplier"]),
         }
@@ -117,8 +111,6 @@ def extract_player_index(fpath, f_idx, whales, chasers):
             }
         currency = row[c["currency"]].strip()
         date = row[c["formatted_debit_at"]]
-        # convert_to_php uses its own currency/date cache, so each unique pair
-        # incurs at most one rate lookup per worker while retaining exact rounding.
         debit = convert_to_php(_parse_amount(row, c["debit_amount"]), currency, date)
         credit = convert_to_php(_parse_amount(row, c["credit_amount"]), currency, date)
         winlose = convert_to_php(_parse_amount(row, c["winlose_amount"]), currency, date)
@@ -151,11 +143,11 @@ def extract_player_index(fpath, f_idx, whales, chasers):
         m["recent"].append((ft, game, debit, credit, winlose, balance))
 
     ordered = sorted(meta, key=lambda pid: meta[pid]["debit"], reverse=True)
-    entries = []
+    entries: list[PlayerIndexEntry] = []
     for rank, pid in enumerate(ordered):
         m = meta[pid]
         country = CURRENCY_COUNTRY.get(m["cur_counts"].most_common(1)[0][0], "Unknown") if m["cur_counts"] else "Unknown"
-        entries.append({
+        entry: PlayerIndexEntry = {
             "id": rank, "pid": pid, "country": country,
             "arch": classify(pid, m["debit"], whales, chasers),
             "debit": round(m["debit"], 2), "winlose": round(m["winlose"], 2), "bets": m["bets"],
@@ -163,14 +155,15 @@ def extract_player_index(fpath, f_idx, whales, chasers):
             "whale": int(pid in whales), "chaser": int(pid in chasers),
             "op": m["ops"].most_common(1)[0][0] if m["ops"] else "UNKNOWN",
             "spike": chasers.get(pid, {}).get("spike_multiplier", 1.0),
-        })
+        }
+        entries.append(entry)
     result = {
         "meta": {"total_players": len(entries), "total_rows": sum(e["bets"] for e in entries),
                  "source_file": fpath.stem, "generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                  "chunk_size": CHUNK_SIZE, "total_chunks": (len(entries) + CHUNK_SIZE - 1) // CHUNK_SIZE},
         "players": entries,
     }
-    path = REPORT_DIR / f"all_players_index_{f_idx:02d}.json"
+    path = OUTPUT_DIR / f"all_players_index_{f_idx:02d}.json"
     _atomic_json(path, result)
     print(f"    Step 1 index -> {path.name} ({path.stat().st_size:,} bytes)")
     return meta, entries, result["meta"]
@@ -256,7 +249,7 @@ def build_trajectories(fpath, f_idx, meta, entries, whales, chasers, index_meta)
         buffers[1].append(convert_to_php(_parse_amount(row, c["balance"]), currency, date))
         buffers[2].append(1 if wl > 0 else -1 if wl < 0 else 0)
 
-    chunk_dir = REPORT_DIR / f"dossier_chunks_{f_idx:02d}"
+    chunk_dir = OUTPUT_DIR / f"dossier_chunks_{f_idx:02d}"
     chunk_dir.mkdir(parents=True, exist_ok=True)
     writers = ThreadPoolExecutor(max_workers=2)
     pending = []
@@ -286,14 +279,13 @@ def build_trajectories(fpath, f_idx, meta, entries, whales, chasers, index_meta)
                     "operators": d["operators"], "recent_rounds": d["recent_rounds"]})
         target = chunk_dir / f"chunk_{chunk_id:04d}.js"
         pending.append(writers.submit(_write_chunk, target, chunk_id, details))
-        # Bound completed JSON payloads retained by the writer queue.
         if len(pending) >= 4:
             pending.pop(0).result()
         del details
     for future in pending: future.result()
     writers.shutdown(wait=True)
     if monolith_players is not None:
-        _atomic_json(REPORT_DIR / f"all_players_dossiers_{f_idx:02d}.json", {"meta": index_meta, "players": monolith_players})
+        _atomic_json(OUTPUT_DIR / f"all_players_dossiers_{f_idx:02d}.json", {"meta": index_meta, "players": monolith_players})
     print(f"    Step 2 chunks -> {chunk_dir.name} ({index_meta['total_chunks']} files)")
 
 
@@ -308,8 +300,8 @@ def _write_chunk(path, chunk_id, details):
 
 def process_file(task):
     f_idx, fpath = task
-    index_path = REPORT_DIR / f"all_players_index_{f_idx:02d}.json"
-    chunk_dir = REPORT_DIR / f"dossier_chunks_{f_idx:02d}"
+    index_path = OUTPUT_DIR / f"all_players_index_{f_idx:02d}.json"
+    chunk_dir = OUTPUT_DIR / f"dossier_chunks_{f_idx:02d}"
     if index_path.exists():
         try:
             with open(index_path, encoding="utf-8") as source: cached = json.load(source)
@@ -330,7 +322,7 @@ def process_file(task):
 
 
 def main():
-    files = sorted(FOLDER.glob("*EXPORT_CSV*.csv"))
+    files = sorted(RAW_DIR.glob("*EXPORT_CSV*.csv"))
     if not files:
         print("No EXPORT_CSV files found")
         return

@@ -12,6 +12,12 @@ The workspace map contains critical information:
 - **Architecture**: All-players dossier system, chunked loading, dashboard structure
 - **Recent changes**: Important fixes and updates
 
+- **Navigation pointers**:
+  - `integration/standardize-src-architecture` branch — created from `master`; merges spec changes from `spec/standardize-src-architecture`
+  - Ticket T1-T18 correspond to files in `src/workspace.py`, `src/ingest/io.py`, `src/ingest/player_index.py`, and refactored ingest/dashboard scripts
+  - Implementer worktrees are created per-ticket under `t<N>-*` directories; clean up with `git worktree remove --force <path>`
+  - Lint check runs via `scripts/generate_all_dashboards.py` before pipeline steps; ruff config at `pyproject.toml`
+
 **Do not proceed with planning, searching, or making changes until you have read and understood `workspace_map.txt`.**
 
 ## Agent skills

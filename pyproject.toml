@@ -1,0 +1,3 @@
+[tool.ruff.lint]
+select = ["E", "F", "W", "N", "I"]
+exclude = ["output/**", "legacy/**", "scripts/generate_chart.js"]

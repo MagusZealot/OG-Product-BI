@@ -32,3 +32,8 @@ logs/
 *.tmp
 *.temp
 temp/
+
+# Agent and Kilo config
+.agents/skills
+skills-lock.json
+.kilo

@@ -2,6 +2,12 @@
                             WORKSPACE MAP — August 2026
 ===============================================================================
 
+Oriental Gaming Title: BI & Risk Intelligence Pipeline
+Transaction-level analytics for 18.2 million wagers across 50,227 players
+(27 exports; approximately 9.5 GB). Generated artifacts live in output/
+(excluded from Git). This file is the single source of truth for project
+structure, scripts, data flow, architecture, and recent changes.
+
 !!! CRITICAL DATA SAFETY WARNING !!!
 --------------------------------------------------------------------------------
 This workspace contains a transaction-level dataset of approximately 17 MILLION
@@ -29,8 +35,34 @@ Large files (name-only, DO NOT READ):
 
 
 --------------------------------------------------------------------------------
+  0. EXPECTED COLUMNS & FILE DISCOVERY
+-------------------------------------------------------------------------------
+
+Transaction export columns (`data/raw/*.csv`):
+  player_id, operator_name, game_name, currency, debit_amount, credit_amount,
+  winlose, formatted_debit_at, device_type, bet_id
+
+Currency snapshot: `data/probability/mnt_game_probability_he_YYYYMMDD.csv` (+ _manifest.json)
+Pace snapshots: `data/round_dealer_time/` + `data/round_table_time/` (mnt_*_daily_YYYYMMDD.csv)
+
+File discovery per pipeline step:
+  Steps 1-5    *.csv in data/raw/                        → all matching files
+  Step 6       *EXPORT_CSV*.csv in data/raw/              → each file independently
+  Step 7       Random 5 *EXPORT_CSV*.csv (random.sample)  → 5 sampled exports
+  Step 8       First 5 exports + derived CSVs              → first 5 exports only
+  Step 13      mnt_game_probability_he_YYYYMMDD.csv        → all daily snapshots
+  Step 15      round_dealer_time/ + round_table_time/      → all available snapshots
+
+Adding transaction exports: place new CSVs in data/raw/; steps 1-6 discover
+them on the next pipeline run. Steps 7-8 remain limited to five exports.
+Skip guards use file modification times, so updated inputs trigger reruns.
+
+Data files are excluded from Git because of their size (~9.5 GB).
+
+-------------------------------------------------------------------------------
   1. FOLDER TREE DIAGRAM
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-
 
  August 2026/                                     (workspace root)
  │
