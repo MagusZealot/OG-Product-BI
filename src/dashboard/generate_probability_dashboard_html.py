@@ -12,9 +12,13 @@ if not (WORKSPACE / "workspace_map.txt").exists():
 
 
 import json
+import sys
 from pathlib import Path
 
 WORKSPACE = Path(WORKSPACE)
+sys.path.insert(0, str(SCRIPT_DIR))
+from render import render_dashboard
+
 DATA_FILE = WORKSPACE / "output" / "game_probability_he_data.json"
 OUT_FILE = WORKSPACE / "output" / "dashboards" / "game_probability_dashboard.html"
 
