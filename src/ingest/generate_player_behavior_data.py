@@ -1,29 +1,18 @@
-from pathlib import Path
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
-
 import csv
 import json
 import sys
-from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
+from pathlib import Path
 
-# Add src/ingest to path for currency_converter import
-sys.path.insert(0, str(Path(__file__).parent))
-from currency_converter import convert_to_php, get_country
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-FOLDER = Path(WORKSPACE / "data" / "raw")
-REPORT_DIR = Path(WORKSPACE / "output")
-files = sorted(FOLDER.glob("*EXPORT_CSV*.csv"))
+from src.workspace import OUTPUT_DIR, RAW_DIR
+from src.ingest import io
+from src.ingest.currency_converter import convert_to_php, get_country
 
-# We will process 5 large export files representing ~3,000,000 wagers across August 2026
+files = sorted(RAW_DIR.glob("*EXPORT_CSV*.csv"))
+
 selected_files = files[:5]
 print(f"Processing {len(selected_files)} files for Player Behavior Deep-Dive...")
 
@@ -51,23 +40,21 @@ balance_tiers = {
     "> 10M": defaultdict(int)
 }
 
-balance_bet_points = [] # Sample points for scatter plot [balance, bet, game, winlose]
+balance_bet_points = []
 inter_bet_intervals = defaultdict(int)
 player_prev_time = {}
 
-# Bet progression: Reaction to Win vs Reaction to Loss
 bet_progression = {
     "after_win_increased": 0,
     "after_win_decreased": 0,
     "after_win_same": 0,
-    "after_loss_increased": 0, # Martingale / Chasing
+    "after_loss_increased": 0,
     "after_loss_decreased": 0,
     "after_loss_same": 0
 }
 player_prev_bet = {}
 player_prev_outcome = {}
 
-# Bet sizing brackets
 bet_brackets = {
     "Micro (< 100)": 0,
     "Low (100 - 1K)": 0,
@@ -97,17 +84,14 @@ for f_idx, fpath in enumerate(selected_files, 1):
             except ValueError:
                 bal = 0.0
 
-            # Get currency and timestamp for conversion
             currency = r.get("currency", "").strip()
             debit_time_str = r.get("formatted_debit_at", "").strip()
             
-            # Convert all monetary amounts to PHP
             debit_php = convert_to_php(debit, currency, debit_time_str)
             credit_php = convert_to_php(credit, currency, debit_time_str)
             winlose_php = convert_to_php(winlose, currency, debit_time_str)
             bal_php = convert_to_php(bal, currency, debit_time_str)
 
-            # Normalize device
             dev_norm = "Mobile" if "mobile" in dev.lower() else ("Desktop" if "desktop" in dev.lower() else "Other")
             device_stats[dev_norm]["bets"] += 1
             device_stats[dev_norm]["debit"] += debit_php
@@ -115,7 +99,6 @@ for f_idx, fpath in enumerate(selected_files, 1):
             if winlose_php > 0: device_stats[dev_norm]["wins"] += 1
             elif winlose_php < 0: device_stats[dev_norm]["losses"] += 1
 
-            # Game stats
             gs = game_stats[g]
             gs["bets"] += 1
             gs["debit"] += debit_php
@@ -130,15 +113,13 @@ for f_idx, fpath in enumerate(selected_files, 1):
                 gs["balances"].append(bal_php)
                 gs["bets_list"].append(debit_php)
 
-            # Bet bracket (using PHP amounts)
             if debit_php > 1000000: bet_brackets["Whale (> 1M)"] += 1
             elif debit_php >= 100000: bet_brackets["VIP (100K - 1M)"] += 1
             elif debit_php >= 10000: bet_brackets["High (10K - 100K)"] += 1
-            elif debit_php >= 1000: bet_brackets["Medium (1K - 10K)"] += 1
+            elif debit_php >= 1000: bet_brackets["Medium (1K - 100K)"] += 1
             elif debit_php >= 100: bet_brackets["Low (100 - 1K)"] += 1
             else: bet_brackets["Micro (< 100)"] += 1
 
-            # Hourly Credit & Win timing
             credit_time_str = r.get("formatted_credit_at", "").strip()
             if credit_time_str and len(credit_time_str) >= 13:
                 try:
@@ -154,7 +135,6 @@ for f_idx, fpath in enumerate(selected_files, 1):
                 except ValueError:
                     pass
 
-            # Balance tier distribution (using PHP balance)
             b_tier = "< 1K"
             if bal_php >= 10000000: b_tier = "> 10M"
             elif bal_php >= 1000000: b_tier = "1M - 10M"
@@ -163,7 +143,6 @@ for f_idx, fpath in enumerate(selected_files, 1):
             elif bal_php >= 1000: b_tier = "1K - 10K"
             balance_tiers[b_tier][g] += 1
 
-            # Scatter sample (Balance vs Bet Size) - using PHP amounts
             if total_processed % 350 == 0 and len(balance_bet_points) < 1500:
                 if bal_php > 0 and debit_php > 0:
                     balance_bet_points.append({
@@ -174,7 +153,6 @@ for f_idx, fpath in enumerate(selected_files, 1):
                         "outcome": "Win" if winlose_php > 0 else ("Loss" if winlose_php < 0 else "Tie")
                     })
 
-            # Inter-bet timing & Bet Progression
             if pid and debit_time_str:
                 try:
                     dt = datetime.strptime(debit_time_str, "%Y-%m-%d %H:%M:%S")
@@ -188,7 +166,6 @@ for f_idx, fpath in enumerate(selected_files, 1):
                             elif delta_sec <= 60: inter_bet_intervals["30s - 60s (Paced)"] += 1
                             else: inter_bet_intervals["> 60s (Deliberate)"] += 1
 
-                    # Bet change behavior after previous round outcome
                     if pid in player_prev_bet and pid in player_prev_outcome:
                         prev_b = player_prev_bet[pid]
                         prev_out = player_prev_outcome[pid]
@@ -197,7 +174,7 @@ for f_idx, fpath in enumerate(selected_files, 1):
                             elif debit_php < prev_b * 0.95: bet_progression["after_win_decreased"] += 1
                             else: bet_progression["after_win_same"] += 1
                         elif prev_out == "loss":
-                            if debit_php > prev_b * 1.05: bet_progression["after_loss_increased"] += 1 # Martingale/Chase!
+                            if debit_php > prev_b * 1.05: bet_progression["after_loss_increased"] += 1
                             elif debit_php < prev_b * 0.95: bet_progression["after_loss_decreased"] += 1
                             else: bet_progression["after_loss_same"] += 1
 
@@ -209,7 +186,6 @@ for f_idx, fpath in enumerate(selected_files, 1):
 
     print(f"[{f_idx}/{len(selected_files)}] Processed in {(datetime.now() - t0).total_seconds():.1f}s")
 
-# Final formatting
 games_summary = []
 for g, s in game_stats.items():
     cnt = s["bets"]
@@ -257,7 +233,6 @@ for h in range(24):
         "rtp_pct": round(rtp, 2)
     })
 
-# Format balance tier matrix
 balance_tier_matrix = []
 for tier, g_dict in balance_tiers.items():
     t_total = sum(g_dict.values())
@@ -269,7 +244,6 @@ for tier, g_dict in balance_tiers.items():
         }
     balance_tier_matrix.append(row)
 
-# Device summary
 devices_summary = []
 for d, s in device_stats.items():
     tot = s["bets"]
@@ -316,9 +290,8 @@ master_behavior_data = {
     "devices": devices_summary
 }
 
-out_file = REPORT_DIR / "player_behavior_data.json"
+out_file = OUTPUT_DIR / "player_behavior_data.json"
 with open(out_file, "w", encoding="utf-8") as f:
     json.dump(master_behavior_data, f, indent=2)
 
 print(f"Exported master player behavior data to {out_file} ({Path(out_file).stat().st_size:,} bytes)")
-
