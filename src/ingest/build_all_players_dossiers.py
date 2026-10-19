@@ -7,31 +7,25 @@ merged all_players_dossiers JSON is deliberately opt-in.
 """
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
+import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import csv
+import io
 import json
 import os
-import sys
 import time
 from array import array
 from collections import Counter, defaultdict, deque
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from datetime import datetime, timezone
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
 from currency_converter import convert_to_php, CURRENCY_COUNTRY
+from workspace import RAW_DIR as FOLDER, OUTPUT_DIR as REPORT_DIR
+from player_index import PlayerIndexEntry
 
-FOLDER = Path(WORKSPACE / "data" / "raw")
-REPORT_DIR = Path(WORKSPACE / "output")
 CHUNK_SIZE = 1000
 MAX_WORKERS = min(max(os.cpu_count() or 2, 2), 4)
 WRITE_MONOLITH = os.environ.get("BUILD_DOSSIER_MONOLITH", "0").strip().lower() in {"1", "true", "yes"}
@@ -117,8 +111,6 @@ def extract_player_index(fpath, f_idx, whales, chasers):
             }
         currency = row[c["currency"]].strip()
         date = row[c["formatted_debit_at"]]
-        # convert_to_php uses its own currency/date cache, so each unique pair
-        # incurs at most one rate lookup per worker while retaining exact rounding.
         debit = convert_to_php(_parse_amount(row, c["debit_amount"]), currency, date)
         credit = convert_to_php(_parse_amount(row, c["credit_amount"]), currency, date)
         winlose = convert_to_php(_parse_amount(row, c["winlose_amount"]), currency, date)
@@ -151,11 +143,11 @@ def extract_player_index(fpath, f_idx, whales, chasers):
         m["recent"].append((ft, game, debit, credit, winlose, balance))
 
     ordered = sorted(meta, key=lambda pid: meta[pid]["debit"], reverse=True)
-    entries = []
+    entries: list[PlayerIndexEntry] = []
     for rank, pid in enumerate(ordered):
         m = meta[pid]
         country = CURRENCY_COUNTRY.get(m["cur_counts"].most_common(1)[0][0], "Unknown") if m["cur_counts"] else "Unknown"
-        entries.append({
+        entry: PlayerIndexEntry = {
             "id": rank, "pid": pid, "country": country,
             "arch": classify(pid, m["debit"], whales, chasers),
             "debit": round(m["debit"], 2), "winlose": round(m["winlose"], 2), "bets": m["bets"],
@@ -163,7 +155,8 @@ def extract_player_index(fpath, f_idx, whales, chasers):
             "whale": int(pid in whales), "chaser": int(pid in chasers),
             "op": m["ops"].most_common(1)[0][0] if m["ops"] else "UNKNOWN",
             "spike": chasers.get(pid, {}).get("spike_multiplier", 1.0),
-        })
+        }
+        entries.append(entry)
     result = {
         "meta": {"total_players": len(entries), "total_rows": sum(e["bets"] for e in entries),
                  "source_file": fpath.stem, "generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -286,7 +279,6 @@ def build_trajectories(fpath, f_idx, meta, entries, whales, chasers, index_meta)
                     "operators": d["operators"], "recent_rounds": d["recent_rounds"]})
         target = chunk_dir / f"chunk_{chunk_id:04d}.js"
         pending.append(writers.submit(_write_chunk, target, chunk_id, details))
-        # Bound completed JSON payloads retained by the writer queue.
         if len(pending) >= 4:
             pending.pop(0).result()
         del details
