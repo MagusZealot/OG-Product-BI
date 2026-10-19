@@ -6,13 +6,13 @@ Runs the complete data pipeline in dependency order:
 
   Lint check (ruff): runs before pipeline steps to validate Python syntax and conventions.
 
-  1. whale_tracking.py                   -> output/reports/whale_analysis.csv
-  2. time_series_analysis.py             -> output/reports/time_series_analysis.csv + hourly_traffic.csv
-  3. chaser_detection.py                 -> output/reports/chaser_detection.csv
-  4. operator_analysis.py                -> output/reports/operator_performance.csv
-  5. generate_heatmap_matrix.py          -> output/reports/country_hourly_heatmap.csv
-  6. build_all_players_dossiers.py       -> output/data/all_players_index_XX.json + output/chunks/dossier_chunks_XX/
-  7. generate_player_behavior_data.py    -> output/data/player_behavior_data.json
+  1. whale_tracking.py                                      -> output/reports/whale_analysis.csv
+  2. time_series_analysis.py                                -> output/reports/time_series_analysis.csv + hourly_traffic.csv
+  3. chaser_detection.py                                    -> output/reports/chaser_detection.csv
+  4. operator_analysis.py                                   -> output/reports/operator_performance.csv
+  5. generate_heatmap_matrix.py                             -> output/reports/country_hourly_heatmap.csv
+  6. build_all_players_dossiers.py                          -> output/data/all_players_index_XX.json + output/chunks/dossier_chunks_XX/
+  7. generate_player_behavior_data.py                       -> output/data/player_behavior_data.json
   8. build_individual_dossiers.py                           -> output/data/individual_dossiers_data.json (42 players + 35 operators)
   9. prepare_dashboard_data.py                              -> output/data/dashboard_data.json (master BI payload)
   10. generate_dashboard_html.py                            -> output/dashboards/bi_dashboard.html (Main BI Console)
