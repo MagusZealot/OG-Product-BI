@@ -13,3 +13,17 @@ The workspace map contains critical information:
 - **Recent changes**: Important fixes and updates
 
 **Do not proceed with planning, searching, or making changes until you have read and understood `workspace_map.txt`.**
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub (repo: MagusZealot/August-2026). Use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
