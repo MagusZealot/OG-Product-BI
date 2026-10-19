@@ -38,9 +38,11 @@ Skip all preambles and keep prose brief. Use the user's domain language from `GL
 
 ### Summary
 
-Pick the smallest view that makes the key point clear.
+Pick the smallest view that makes the key point clear. Choose the visualization type that best communicates the change's intent and impact.
 
-- Show logic or an algorithm as pseudocode:
+#### Visualization Options
+
+**Pseudocode** — Show logic or an algorithm step-by-step:
 
 ```text
 on(save)
@@ -50,7 +52,7 @@ on(save)
   return fresh result
 ```
 
-- Show runtime control flow as a call tree:
+**Call tree** — Show runtime control flow from entry point to side effects:
 
 ```text
 submitForm
@@ -60,7 +62,7 @@ submitForm
   navigateToSession
 ```
 
-- Show UI structure as a component tree, including state and module boundaries that matter:
+**Component tree** — Show UI structure with state and module boundaries:
 
 ```text
 <SessionPage> (apps/example/src/routes/session.tsx)
@@ -69,7 +71,7 @@ submitForm
     <RunSkillButton> (packages/ui)
 ```
 
-- Show file responsibility or a broad refactor as a shallow file tree:
+**File tree** — Show broad refactoring or file-responsibility boundaries:
 
 ```text
 src/
@@ -78,7 +80,7 @@ src/
 └── transport/      # sends API requests
 ```
 
-- Show component interaction, control flow, or data flow with Mermaid:
+**Mermaid sequence diagram** — Show component interaction, data flow, or call stacks:
 
 ```mermaid
 sequenceDiagram
@@ -90,7 +92,7 @@ sequenceDiagram
     Daemon-->>UI: stream result
 ```
 
-- Use `diff` when the point is what changes and the surrounding shape already exists. Match the diff shape to the topic.
+**Diff syntax** — When the surrounding shape already exists, show only the changed lines:
 
 For a component change:
 
@@ -140,7 +142,7 @@ For a state or control-flow change:
 +  invalidate cache
 ```
 
-- Show the whole block when most of it is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape:
+**Full block** — When most of the content is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape:
 
 ```ts
 function expandSkill(command: string): string {
@@ -151,20 +153,30 @@ function expandSkill(command: string): string {
 
 #### Guidance
 
-Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
-
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+- Place each visual next to the short text it supports.
+- Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or resolve the discussion point.
+- Use one or several visuals — it is unlikely you will use all of them.
+- Use your judgement and don't overwhelm the user.
+- Match the visualization type to the nature of the change: pseudocode for algorithms, call trees for control flow, component trees for UI, file trees for restructuring, diffs for incremental changes, full blocks for new logic.
 
 ### Evidence
 
 Concrete evidence that the change works. Show a before and after.
 
-Screenshots are S-tier - when the environment is set up for it and the change is visual.
+**Screenshots** are S-tier — when the environment is set up for it and the change is visual.
 
-Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.
+**Execution-based evidence** is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode. Include command flags, error snippets, or output highlights.
 
 ### Merge Danger
 
 Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
 
-The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
+The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples include: layout shift, breakages for consumers, mobile responsiveness, performance degradation, API contract changes, data loss, security regressions, or build failures.
+
+<optional: potential ramifications of merge>
+
+- Cross-module ripple effects
+- Consumer impact (breaking changes, deprecated APIs)
+- Deployment pipeline impact
+- Rollback complexity and cost
+- Testing gaps introduced by the change

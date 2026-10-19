@@ -21,7 +21,7 @@ The pipeline generates four interactive dashboards in `output/dashboards/`:
 
 **Requirements:** Python 3.8 or later and, on Windows, the `py` launcher.
 Place the required source data before running the pipeline; see
-[`data/README.md`](data/README.md).
+[`workspace_map.md`](workspace_map.md).
 
 ---
 
@@ -30,7 +30,7 @@ Place the required source data before running the pipeline; see
 ```
 August 2026/
 ├── .kilo/                                      # Kilo agent configuration
-├── data/                                       # Source data (gitignored); see data/README.md
+├── data/                                       # Source data (gitignored)
 ├── scripts/                                    # Pipeline entry points
 ├── src/                                        # Python data and dashboard scripts
 └── output/                                     # Generated artifacts (gitignored)
@@ -40,14 +40,10 @@ August 2026/
 
 ## Documentation
 
-All technical reference lives in [`workspace_map.txt`](workspace_map.txt) — the single
+All technical reference lives in [`workspace_map.md`](workspace_map.md) — the single
 source of truth for project structure, scripts, data flow, architecture,
 expected columns, file discovery, pipeline steps, skip guards, dossier system,
 currency standardization, and recent changes.
-
-- [`data/README.md`](data/README.md) — Source data requirements, placement,
-  file discovery, and dealer/table pace feeds.
-- [`workspace_map.txt`](workspace_map.txt) — Full technical reference.
 
 ---
 
