@@ -4,6 +4,8 @@ Generate all Oriental Gaming Title dashboards and their source data files.
 
 Runs the complete data pipeline in dependency order:
 
+  Lint check (ruff): runs before pipeline steps to validate Python syntax and conventions.
+
   1. whale_tracking.py                   -> output/reports/whale_analysis.csv
   2. time_series_analysis.py             -> output/reports/time_series_analysis.csv + hourly_traffic.csv
   3. chaser_detection.py                 -> output/reports/chaser_detection.csv
@@ -11,15 +13,15 @@ Runs the complete data pipeline in dependency order:
   5. generate_heatmap_matrix.py          -> output/reports/country_hourly_heatmap.csv
   6. build_all_players_dossiers.py       -> output/data/all_players_index_XX.json + output/chunks/dossier_chunks_XX/
   7. generate_player_behavior_data.py    -> output/data/player_behavior_data.json
-  8. build_individual_dossiers.py        -> output/data/individual_dossiers_data.json (42 players + 35 operators)
-  9. prepare_dashboard_data.py           -> output/data/dashboard_data.json (master BI payload)
-  10. generate_dashboard_html.py         -> output/dashboards/bi_dashboard.html (Main BI Console)
-  11. generate_behavior_dashboard_html.py -> output/dashboards/player_behavior_dashboard.html
-  12. inject_dossier_tabs.py             -> injects dossier system into behavior console
-  13. probability_he_ingest.py           -> output/game_probability_he_data.json (always refreshes)
-  14. generate_probability_dashboard_html.py -> output/dashboards/game_probability_dashboard.html
-  15. round_dealer_table_time_ingest.py  -> output/round_dealer_table_time_data.json
-  16. generate_round_dealer_table_time_dashboard_html.py -> output/dashboards/round_dealer_table_time_dashboard.html
+  8. build_individual_dossiers.py                           -> output/data/individual_dossiers_data.json (42 players + 35 operators)
+  9. prepare_dashboard_data.py                              -> output/data/dashboard_data.json (master BI payload)
+  10. generate_dashboard_html.py                            -> output/dashboards/bi_dashboard.html (Main BI Console)
+  11. generate_behavior_dashboard_html.py                   -> output/dashboards/player_behavior_dashboard.html
+  12. inject_dossier_tabs.py                                -> injects dossier system into behavior console
+  13. probability_he_ingest.py                              -> output/game_probability_he_data.json (always refreshes)
+  14. generate_probability_dashboard_html.py                -> output/dashboards/game_probability_dashboard.html
+  15. round_dealer_table_time_ingest.py                     -> output/round_dealer_table_time_data.json
+  16. generate_round_dealer_table_time_dashboard_html.py    -> output/dashboards/round_dealer_table_time_dashboard.html
 
 All scripts use hardcoded absolute paths under the workspace root, so they are
 invoked as standalone processes from the workspace working directory.
@@ -32,6 +34,29 @@ from pathlib import Path
 
 WORKSPACE = Path(__file__).resolve().parent.parent
 SRC_DIR = WORKSPACE / "src"
+
+
+def lint_src():
+    """Run ruff lint check on all src/ files."""
+    print("\n" + "=" * 60)
+    print("LINT CHECK (ruff)")
+    print("=" * 60)
+    result = subprocess.run(
+        ["py", "-m", "ruff", "check", str(SRC_DIR), "--select", "E,F,W,N,I"],
+        cwd=str(WORKSPACE),
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        print(result.stdout)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr)
+    if result.returncode != 0:
+        print(f"Lint check found {result.returncode} issue(s). Aborting pipeline.")
+        return False
+    print("Lint check passed - no issues found.")
+    return True
+
 
 STEPS = [
     ("[1/16] Whale tracking analysis",
@@ -375,6 +400,10 @@ def run_step(label, script_path):
 
 
 def main():
+    # Lint check before running pipeline
+    if not lint_src():
+        return 1
+
     print("=" * 60)
     print("Oriental Gaming Title - Full Dashboard Pipeline")
     print("=" * 60)

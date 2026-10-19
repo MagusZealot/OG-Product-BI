@@ -1,5 +1,5 @@
 ===============================================================================
-                    COMPRESSED WORKSPACE MAP — August 2026
+              COMPRESSED WORKSPACE MAP — August 2026
 ===============================================================================
 
 ⚠️ CRITICAL DATA SAFETY
@@ -7,202 +7,25 @@
 - NEVER open, read, or process raw exports or any file >100 KB
 - Large files listed by NAME ONLY — inspect only via Python scripts printing summaries
 
---------------------------------------------------------------------------------
-PROJECT STRUCTURE
---------------------------------------------------------------------------------
-August 2026/
-├── .kilo/                    # Kilo agent config
-├── data/
-│   ├── probability/          # Cached daily game probability/HE snapshots (CSV, each <100KB)
-│   │   ├── mnt_game_probability_he_YYYYMMDD.csv
-│   │   └── _manifest.json    # Scan range & unavailable dates (missing: 2026-01-13 to 2026-01-29)
-│   ├── raw/                  # 27 raw CSV exports (NAME ONLY — DO NOT READ)
-│   └── round_dealer_time/    # Dealer daily snapshots (for pace console)
-│   └── round_table_time/     # Table daily snapshots (for pace console)
-├── scripts/
-│   ├── generate_all_dashboards.py   # 16-step master pipeline wrapper
-│   └── generate_chart.js
-├── src/
-│   ├── ingest/               # Raw-data ingestion & analysis (14 scripts)
-│   │   ├── whale_tracking.py              # Step 1: Pareto top-20% by debit
-│   │   ├── time_series_analysis.py        # Step 2: Country peak-hour + hourly traffic
-│   │   ├── chaser_detection.py            # Step 3: Problem-gambling flags (3+ losses + 3x spike)
-│   │   ├── operator_analysis.py           # Step 4: Operator profitability
-│   │   ├── generate_heatmap_matrix.py     # Step 5: Country x 24h bet matrix
-│   │   ├── build_all_players_dossiers.py  # Step 6: Two-pass per-export index + trajectory chunks
-│   │   ├── generate_player_behavior_data.py # Step 7: Behavior telemetry (5 random exports)
-│   │   ├── build_individual_dossiers.py   # Step 8: Curated 42 player + 35 operator dossiers
-│   │   ├── probability_he_ingest.py       # Step 13: Fetch/backfill probability snapshots
-│   │   ├── round_dealer_table_time_ingest.py # Step 15: Unified dealer+table pace data
-│   │   ├── currency_converter.py          # Shared: PHP conversion + country map (frankfurter.app, 30-day cache)
-│   │   └── currency_cache.json            # Cached FX rates
-│   ├── dashboard/            # Dashboard data prep & rendering
-│   │   ├── prepare_dashboard_data.py           # Step 9: Master BI payload
-│   │   ├── generate_dashboard_html.py          # Step 10: MAIN BI Console (bi_dashboard.html);
-│   │   │                     # Fixed paths: REPORT_DIR→DATA_DIR for index files,
-│   │   │                     # new CHUNK_SRC_DIR for per-file chunks; hardened skip-guard
-│   │   │                     # with chunks_complete() check; removed unverified Executive
-│   │   │                     # Findings & Strategic Directives matrix
-│   │   ├── generate_behavior_dashboard_html.py # Step 11: Behavior Console
-│   │   ├── generate_probability_dashboard_html.py # Step 14: Probability & HE Console
-│   │   ├── generate_round_dealer_table_time_dashboard_html.py # Step 16: Pace Console
-│   │   ├── inject_dossier_tabs.py              # Step 12: Inject dossier system into behavior console
-│   │   ├── regenerate_summary_csvs.py          # Regenerates whale/chaser CSVs from unified index
-│   │   └── sections/                           # Reusable HTML/JS components
-│   │       ├── nav_buttons.html
-│   │       ├── tab_players.html      # Tab 6: ALL-player browser
-│   │       ├── tab_operators.html    # Tab 7: Operator dossiers
-│   │       ├── slides.html
-│   │       └── dossier.js            # Dossier module: index + chunk loader
-│   └── verify/               # Inspection/verification utilities
-├── output/
-│   ├── dashboards/           # Generated HTML dashboards
-│   │   ├── dashboard-common.css   # Shared stylesheet (consistent look across all dashboards)
-│   │   ├── bi_dashboard.html                     # ~11 MB (Oriental Gaming Title BI & Risk Intelligence Console)
-│   │   ├── game_probability_dashboard.html       # Probability & HE Console
-│   │   ├── player_behavior_dashboard.html        # Player Behavioral Intelligence Console
-│   │   ├── round_dealer_table_time_dashboard.html # Unified Dealer & Table Pace Console
-│   │   └── viewer.html
-│   ├── data/                 # JSON/CSV outputs
-│   │   ├── all_players_index.json / all_players_index_XX.json
-│   │   ├── dashboard_data.json
-│   │   ├── game_probability_he_data.json
-│   │   ├── individual_dossiers_data.json
-│   │   ├── player_behavior_data.json
-│   │   ├── round_dealer_table_time_data.json
-│   │   └── *.csv (whale, chaser, heatmap, operator, time_series, hourly_traffic)
-│   ├── dossiers/             # all_players_dossiers_XX.json (optional monolith)
-│   ├── chunks/               # Trajectory chunks for lazy loading
-│   │   ├── dossier_chunks/              # Aggregate chunks (chunk_0000.js ... chunk_0050.js)
-│   │   └── dossier_chunks_XX/           # Per-export chunks
-│   ├── progress/             # progress.json (live pipeline progress)
-│   └── reports/              # CSV reports
-├── docs/
-│   └── analysis_log.txt
-└── workspace_map.txt
+-------------------------------------------------------------------------------
+SINGLE SOURCE OF TRUTH
+-------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
-MASTER PIPELINE (16 Steps) — Run: py scripts\generate_all_dashboards.py
---------------------------------------------------------------------------------
-  1. whale_tracking.py              → whale_analysis.csv (20 whales)
-  2. time_series_analysis.py        → time_series_analysis.csv + hourly_traffic.csv
-  3. chaser_detection.py            → chaser_detection.csv (25,263 flagged players)
-  4. operator_analysis.py           → operator_performance.csv (750 operators)
-  5. generate_heatmap_matrix.py     → country_hourly_heatmap.csv
-  6. build_all_players_dossiers.py  → all_players_index_XX.json + dossier_chunks_XX/*.js (timestamps[] for calendar)
-  7. generate_player_behavior_data.py → player_behavior_data.json
-  8. build_individual_dossiers.py   → individual_dossiers_data.json (42 players + 35 operators)
-  9. prepare_dashboard_data.py      → dashboard_data.json (master BI payload)
- 10. generate_dashboard_html.py     → bi_dashboard.html (MAIN BI CONSOLE);
-         Fixed paths: REPORT_DIR→DATA_DIR for index files, new CHUNK_SRC_DIR for per-file chunks;
-         hardened skip-guard with chunks_complete() check; removed unverified Executive
-         Findings & Strategic Directives matrix (Whale Exposure / Tilt Intervention /
-         Regional Push Windows / B2B Skin Hegemony cards + dead execTilt JS)
- 11. generate_behavior_dashboard_html.py → player_behavior_dashboard.html
- 12. inject_dossier_tabs.py         → Injects dossier system into behavior console
- 13. probability_he_ingest.py       → game_probability_he_data.json (always runs for new snapshots)
- 14. generate_probability_dashboard_html.py → game_probability_dashboard.html
- 15. round_dealer_table_time_ingest.py → round_dealer_table_time_data.json
- 16. generate_round_dealer_table_time_dashboard_html.py → round_dealer_table_time_dashboard.html
+All project documentation — structure, scripts, data flow, architecture,
+expected columns, file discovery, pipeline steps, skip guards, dossier system,
+currency standardization, and recent changes — lives in:
 
-Skip-guards: Steps skipped when outputs exist and are newer than dependencies;
-  step 10 adds chunks_complete() check that forces rebuild when output/dossier_chunks/
-  is missing or incomplete (previously only compared timestamps).
-Progress: Each step writes output\progress.json (timestamp, stage, message, progress%, details)
+  workspace_map.txt
 
---------------------------------------------------------------------------------
-ALL-PLAYERS DOSSIER SYSTEM (Tab 6: Player Dossiers, Tab 7: Operator Dossiers)
---------------------------------------------------------------------------------
-GOAL: All 50,227 players browsable with FULL round-by-round balance trajectory
+This compressed map exists only as a quick safety reminder. For anything
+beyond the data-safety warning above, consult workspace_map.txt.
 
-EMBEDDED PAYLOAD (bi_dashboard.html, <script id="dossier-raw-data">):
-  { meta: {total_players: 50227, total_rows: 18275592, files: 27, chunk_size: 1000, total_chunks: 51},
-    players: [50,227 compact entries — id==array position==rank, sorted by total debit desc],
-    operators: [35 detailed operator dossiers] }
+-------------------------------------------------------------------------------
+QUICK REFERENCE
+-------------------------------------------------------------------------------
 
-COMPACT PLAYER INDEX ENTRY:
-  id, pid, country, arch, debit, winlose, bets, avg_bet, whale (bool), chaser (bool), op, spike
-
-TRAJECTORY CHUNK (dossier_chunks/chunk_NNNN.js, window.DOSSIER_CHUNK_NNNN):
-  Keyed by pid. Per player: balance_series[], timestamps[] (Unix sec/round), hours[24],
-  games[], devices{Mobile,Desktop}, recent_rounds[{time,game,debit,credit,winlose,balance}]
-
-TAB 6 FEATURES:
-  - Search bar (ID/country/archetype/operator), Tier filter (All/Whales/Chasers/13 archetypes)
-  - Country filter + 5 sort modes (debit, bets, pnl, spike, avg_bet)
-  - Paginated card grid (60/120/240/page) with WHALE/CHASER tags, flag, archetype pill, 4 KPIs
-  - Card click → openPlayerDossier(id) → lazy-loads chunk → renders FULL trajectory, calendar, charts
-  - Monthly Activity Calendar: interactive month grid, click day → 24h breakdown
-  - Archetype Legend: 13 clickable toggle cards (Extreme Chaser → Casual Player)
-  - Export All Players CSV
-
-TAB 7 FEATURES:
-  - 35 operator cards (GGR, hold margin, players, bets/player, volume, avg bet)
-  - Click → games bar chart, hourly load, device mix, top-players table
-
-ENTRY POINTS:
-  - openPlayerDossierById(pid) — from whale leaderboard, chaser registry, operator top-players, scatter chart
-  - openOperatorDossierById(name) — from operator bubble chart
-  - exportDossierCSV('players'|'operators')
-
-REQUIREMENT: dossier_chunks\ must sit next to bi_dashboard.html (and behavior dashboard after step 12).
-Works via file:// or python -m http.server.
-
---------------------------------------------------------------------------------
-CURRENCY STANDARDIZATION
---------------------------------------------------------------------------------
-- All amounts converted to PHP (Philippine Peso) using date-relative historical rates
-- Module: src/ingest/currency_converter.py
-  - frankfurter.app API, disk cache (currency_cache.json, 30-day TTL)
-  - convert_to_php(amount, currency, date_str)
-  - get_country(currency) / CURRENCY_COUNTRY map (consistent across all scripts)
-  - BASE_RATES fallback for VND, TWD, MMK, NPR, BDT (unsupported by API)
-- All derived CSVs, JSON, and dashboards reflect PHP-normalized values
-
---------------------------------------------------------------------------------
-KEY RECENT FIXES (2026-10-09 to 2026-10-13)
---------------------------------------------------------------------------------
-1. MERGED TRAJECTORIES: merge_per_file_dossiers() now concatenates multi-file player trajectories chronologically by timestamps (19,045 multi-file players fixed)
-2. REGENERATED UNIFIED INDEX: all_players_index.json + dossier_chunks/ with correct totals
-3. regenerate_summary_csvs.py: Regenerates whale/chaser CSVs from unified index for consistency
-4. WHALE/CHASER CONSISTENCY: 0 mismatches (was 20/20 whales, 10/10 chasers mismatched)
-5. WHALE ANALYSIS LIMITED TO TOP 20: VIP Whales tab shows exactly 20 players
-6. WHALE GROUP DOSSIER (Tab 1): Aggregate KPIs (7.27B debit, 123K wagers, 0.74h avg session, 4 countries, 42.3% casino concentration), archetypes, 5 insights
-7. CHASER GROUP DOSSIER (Tab 2): Aggregate KPIs (22.61B debit, 25,263 flagged, 69.1% net losers, -334.6M P&L, 7,500x peak spike), risk tiers, tilt threshold (L3 peak at 11.2%), 5 insights
-8. FIXED TILT CURVE CHART: Filters streak≥3, uses live denominator (25,263), markPoint on L3 bar
-9. FIXED 24-HOUR OUTCOME VOLUME: Removed `stack: 'Total'` from Wins/Losses/Pushes lines
-10. ARCHETYPE LEGEND + TOGGLE FILTER (Tab 6): 13 clickable cards, AND-combined with search/tier/country
-11. PROBABILITY CONSOLE REDESIGN (Sections 9-14):
-    - All games displayed simultaneously (no game dropdown)
-    - Combined Summary: pooled HE trend, probability trend, cross-game comparisons
-    - Per-game sections: table + conditional HE trend chart (hidden if no HE data)
-    - Threshold Breach Analytics: calendar heatmap, stacked bars, betting-area horizontal bar chart
-    - Sticky header with filters + quick nav (jump links)
-    - Conditional table columns (drops HE cols for games without model)
-    - Zero-breach filtering on breach charts
-    - 7-day trend window option added
-
-12. DEALER & TABLE PACE CONSOLE (Step 16):
-    - Game-type selector scopes all KPIs/charts/tables to one game
-    - Watchlist: Slow Dealers — horizontal bar chart, click opens dealer dossier
-    - Watchlist: High-Variance Shifts — dealer daily STD > 200% of 30-day moving avg,
-      top 30 bars + dataZoom slider, click opens dealer dossier; per-dealer panel
-      inside each dealer dossier (top 20 shifts)
-    - High Variance Shifts filter on Individualized Dealer Dossier card grid
-    - Dealer Speed Over Time — baseline line + top/bottom 5 dealer trends,
-      dashed golden "Baseline Avg" markLine
-    - Day-of-Week Volatility — highest/lowest bars red/green, centered color legend
-    - Efficiency Matrix, Pace Extremes (top/bottom 10), Individualized Dealer
-      Dossier with filters (baseline, min days, WoW, high-variance shifts)
-    - Forensics table — paginated 100/page
-    - Jump to interface — sticky header nav linking to all sections
-
---------------------------------------------------------------------------------
-RUNTIME NOTES
---------------------------------------------------------------------------------
-- Use `py` not `python` (Microsoft Store alias blocked)
-- All scripts use HARDCODED paths — edit constants at top of file to change targets
-- Dashboard HTML files link to each other (cross-dashboard nav)
-- Shared stylesheet: output/dashboards/dashboard-common.css (consistent look across all 4 dashboards)
-- All 4 generator scripts updated with CSS link + cross-links to other dashboards
-- Viewer.html polls output/progress.json for live pipeline progress
+- Run pipeline:        py scripts\generate_all_dashboards.py
+- Python launcher:     use `py` (not `python`; Microsoft Store alias blocked)
+- Dashboards:          output\dashboards\ (bi, behavior, probability, pace)
+- Progress tracking:   output\progress\progress.json
+- Data safety:         NEVER read files >100 KB or data\raw\ directly
