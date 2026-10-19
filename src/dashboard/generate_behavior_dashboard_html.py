@@ -4,21 +4,13 @@ import sys
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from render import render_dashboard
 
-REPORT_DIR = Path(WORKSPACE / "output" / "dashboards")
-DATA_DIR = Path(WORKSPACE / "output")
-FOLDER = REPORT_DIR.parent
-DATA_FILE = DATA_DIR / "data" / "player_behavior_data.json"
+DATA_FILE = WORKSPACE / "output" / "data" / "player_behavior_data.json"
 SECTIONS_DIR = SCRIPT_DIR / "sections"
 
 TITLE = "Player Behavioral Intelligence Console | Oriental Gaming Title"
@@ -29,7 +21,7 @@ def build_dashboard():
         print(f"Data file {DATA_FILE} not found yet!")
         return False
 
-    out_file = REPORT_DIR / "player_behavior_dashboard.html"
+    out_file = WORKSPACE / "output" / "dashboards" / "player_behavior_dashboard.html"
 
     extra_scripts = """<script>
     console.log("Player Behavior Data Loaded:", DATA);

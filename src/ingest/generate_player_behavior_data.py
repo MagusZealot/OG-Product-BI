@@ -11,9 +11,7 @@ from src.workspace import OUTPUT_DIR, RAW_DIR
 from src.ingest import io
 from src.ingest.currency_converter import convert_to_php, get_country
 
-FOLDER = RAW_DIR
-REPORT_DIR = OUTPUT_DIR
-files = sorted(FOLDER.glob("*EXPORT_CSV*.csv"))
+files = sorted(RAW_DIR.glob("*EXPORT_CSV*.csv"))
 
 selected_files = files[:5]
 print(f"Processing {len(selected_files)} files for Player Behavior Deep-Dive...")
@@ -292,7 +290,7 @@ master_behavior_data = {
     "devices": devices_summary
 }
 
-out_file = REPORT_DIR / "player_behavior_data.json"
+out_file = OUTPUT_DIR / "player_behavior_data.json"
 with open(out_file, "w", encoding="utf-8") as f:
     json.dump(master_behavior_data, f, indent=2)
 

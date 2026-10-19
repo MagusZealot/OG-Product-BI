@@ -6,11 +6,6 @@ import tempfile
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 WORKSPACE = SCRIPT_DIR.parent.parent
-if not (WORKSPACE / "workspace_map.txt").exists():
-    for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
-            WORKSPACE = _parent
-            break
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -18,10 +13,9 @@ if str(SCRIPT_DIR) not in sys.path:
 from render import render_dashboard
 
 DATA_FILE = WORKSPACE / "output" / "data" / "dashboard_data.json"
-REPORT_DIR = WORKSPACE / "output"
 DATA_DIR = WORKSPACE / "output" / "data"
 CHUNK_SRC_DIR = WORKSPACE / "output" / "chunks"
-CHUNK_DIR = REPORT_DIR / "dossier_chunks"
+CHUNK_DIR = WORKSPACE / "output" / "dossier_chunks"
 CHUNK_SIZE = 1000
 
 SECTIONS_DIR = SCRIPT_DIR / "sections"
