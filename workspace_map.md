@@ -10,7 +10,7 @@
 ---
  
  > [!WARNING]
- > **CRITICAL DATA SAFETY WARNING** {#critical-data-safety-warning}
+ > **CRITICAL DATA SAFETY WARNING**
  >
  > | Constraint | Details |
  > |------------|---------|
@@ -21,7 +21,6 @@
  > | **Inspection** | ONLY via Python scripts that print small summaries |
  >
  > <details>
- > <summary><strong>Large files (name-only — DO NOT READ)</strong></summary>
  >
  > | Path | Description | Size |
  > |------|-------------|------|
@@ -105,6 +104,7 @@ winlose, formatted_debit_at, device_type, bet_id
 
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 graph TD
     root[August 2026/]
     
@@ -353,6 +353,7 @@ flowchart TD
     classDef build fill:#bbf,stroke:#333;
     classDef output fill:#bfb,stroke:#333;
     classDef raw fill:#f9f,stroke:#333,stroke-width:2px;
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 
     class Pass1,Pass2 build;
     class Index,Chunks output;
@@ -509,6 +510,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     %% Main Ingestion Flow
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
     raw_exports[("27 Raw Exports<br/>(data\\raw\\)")]
 
     subgraph ingestion_scripts["7 Ingestion Scripts"]
@@ -707,6 +709,7 @@ argv is passed; each writes output\progress.json). Invoke with:
 ### 6.1 Dependency Graph
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     step1[Step 1: whale_tracking.py]
     step2[Step 2: time_series_analysis.py]
@@ -782,6 +785,7 @@ flowchart TD
         S8[build_individual_dossiers.py]
         S13[probability_he_ingest.py]
         S15[round_dealer_table_time_ingest.py]
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
     end
 
     subgraph Prep["Dashboard Prep"]
@@ -1443,4 +1447,10 @@ dashboard generator:
       Forensics Table)
 
 </details>
+<style>
+mermaid {
+    color: #ffffff !important;
+    background-color: #000000 !important;
+}
+</style>
 EOF
