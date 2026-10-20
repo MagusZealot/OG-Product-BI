@@ -106,7 +106,72 @@ winlose, formatted_debit_at, device_type, bet_id
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 graph TD
-    A --> B
+    A[August 2026/] --> B[.kilo/]
+    A --> C[data/]
+    A --> D[scripts/]
+    A --> E[src/]
+    A --> F[docs/]
+    
+    B --> G[.gitignore]
+    B --> H[kilo.jsonc]
+    
+    C --> I[probability/]
+    C --> J[round_dealer_time/]
+    C --> K[round_table_time/]
+    C --> L[raw/]
+    
+    I --> M[mnt_game_probability_he_YYYYMMDD.csv]
+    I --> N[_manifest.json]
+    
+    J --> O[mnt_round_dealer_time_daily_YYYYMMDD.csv]
+    J --> P[_manifest.json]
+    
+    K --> Q[mnt_round_table_time_daily_YYYYMMDD.csv]
+    K --> R[_manifest.json]
+    
+    L --> S[2026-10-06-13-38-11_EXPORT_CSV_45625_808_0.csv]
+    L --> T[2026-10-06-14-02-59_EXPORT_CSV_45627_085_0.csv]
+    L --> U[... (25 more, 2026-10-06 through 2026-10-07) ...]
+    L --> V[2026-10-07-17-46-44_EXPORT_CSV_45680_721_0.csv]
+    
+    D --> W[generate_all_dashboards.py]
+    D --> X[generate_chart.js]
+    
+    E --> Y[ingest/]
+    
+    Y --> Z[advanced_analysis.py]
+    Y --> AA[whale_tracking.py]
+    Y --> AB[time_series_analysis.py]
+    Y --> AC[chaser_detection.py]
+    Y --> AD[operator_analysis.py]
+    Y --> AE[generate_heatmap_matrix.py]
+    Y --> AF[build_all_players_dossiers.py]
+    Y --> AG[generate_player_behavior_data.py]
+    Y --> AH[build_individual_dossiers.py]
+    Y --> AI[probability_he_ingest.py]
+    Y --> AJ[currency_converter.py]
+    Y --> AK[currency_cache.json]
+    Y --> AL[inspect_behavior_metrics.py]
+    Y --> AM[sample_behavior_check.py]
+    Y --> AN[sample_profile_extractor.py]
+    
+    Y --> AP[dashboard/]
+    
+    AP --> AQ[prepare_dashboard_data.py]
+    AP --> AR[generate_dashboard_html.py]
+    AP --> AS[generate_behavior_dashboard_html.py]
+    AP --> AT[generate_probability_dashboard_html.py]
+    AP --> AU[inject_dossier_tabs.py]
+    AP --> AV[regenerate_summary_csvs.py]
+    AP --> AW[sections/]
+    
+    AW --> AX[nav_buttons.html]
+    AW --> AY[tab_players.html]
+    AW --> AZ[tab_operators.html]
+    AW --> [slides.html]
+    AW --> [dossier.js]
+    
+    A --> [workspace_map.md]
 ```
 
 <details>
