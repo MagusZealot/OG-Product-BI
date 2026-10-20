@@ -773,39 +773,134 @@ optional and disabled by default.
 ## 4. DATA FLOW SUMMARY {#4-data-flow-summary}
 
 
-27 raw exports (data\raw\)
-    │
-    ├─> whale_tracking.py ........ whale_analysis.csv ──────────────┐
-    ├─> time_series_analysis.py .. time_series_analysis.csv ────────┤
-    │                               hourly_traffic.csv ─────────────┤
-    ├─> chaser_detection.py ...... chaser_detection.csv ────────────┤
-    ├─> operator_analysis.py ..... operator_performance.csv ────────┤
-    ├─> generate_heatmap_matrix.py country_hourly_heatmap.csv ──────┤
-    ├─> generate_player_behavior_data.py player_behavior_data.json ─┤
-    ├─> build_all_players_dossiers.py ─┬ all_players_index_XX.json ─┤
-    │                                  ├ dossier_chunks_XX/*.js ────┤
-    │                                  └ optional per-file monolith │
-    (chunks now include timestamps[] for Monthly Activity Calendar)
-    └─> build_individual_dossiers.py ── individual_dossiers_data.json
-                                              (reads whale/chaser/operator
-                                               CSVs + first 5 exports)
-                                                                        │
-derived CSVs ─> prepare_dashboard_data.py ─> dashboard_data.json ───────┤
-                                                                        │
-dashboard_data.json + all_players_index.json + individual_dossiers_data.json
-      + sections/* ─> generate_dashboard_html.py ─> bi_dashboard.html
-                      (Oriental Gaming Title BI & Risk Intelligence Console)
-player_behavior_data.json ─> generate_behavior_dashboard_html.py ─> player_behavior_dashboard.html
-player_behavior_dashboard.html ─> inject_dossier_tabs.py ─> dossier-enabled behavior HTML
+```mermaid
+flowchart TD
+    %% Main Ingestion Flow
+    raw_exports[("27 Raw Exports<br/>(data\\raw\\)")]
 
-data\probability\mnt_game_probability_he_YYYYMMDD.csv
-      ─> probability_he_ingest.py ─> game_probability_he_data.json
-      ─> generate_probability_dashboard_html.py
-      ─> game_probability_dashboard.html
+    subgraph ingestion_scripts["7 Ingestion Scripts"]
+        whale[whale_tracking.py]
+        ts[time_series_analysis.py]
+        chase[chaser_detection.py]
+        op[operator_analysis.py]
+        heatmap[generate_heatmap_matrix.py]
+        behavior_ingest[generate_player_behavior_data.py]
+        dossier_build[build_all_players_dossiers.py]
+    end
 
-RUNTIME (browser): bi_dashboard.html embeds the index + operator dossiers;
-each player card click lazy-loads its chunk_NNNN.js from dossier_chunks\.
-The four dashboard HTML files link to one another via shared dashboard-common.css stylesheet.
+    subgraph derived_csvs["Derived CSVs & JSON"]
+        whale_csv[whale_analysis.csv]
+        ts_csv[time_series_analysis.csv]
+        hourly_csv[hourly_traffic.csv]
+        chase_csv[chaser_detection.csv]
+        op_csv[operator_performance.csv]
+        heatmap_csv[country_hourly_heatmap.csv]
+        player_behavior_data[player_behavior_data.json]
+        all_players_index[all_players_index_XX.json]
+        all_players_index_agg[all_players_index.json<br/>(aggregate)]
+        chunks_js[dossier_chunks_XX/*.js]
+        individual_dossiers[individual_dossiers_data.json]
+    end
+
+    raw_exports --> whale
+    raw_exports --> ts
+    raw_exports --> chase
+    raw_exports --> op
+    raw_exports --> heatmap
+    raw_exports --> behavior_ingest
+    raw_exports --> dossier_build
+
+    whale --> whale_csv
+    ts --> ts_csv
+    ts --> hourly_csv
+    chase --> chase_csv
+    op --> op_csv
+    heatmap --> heatmap_csv
+    behavior_ingest --> player_behavior_data
+    dossier_build --> all_players_index
+    dossier_build --> chunks_js
+    all_players_index --> all_players_index_agg
+
+    raw_exports -.->|first 5 exports + CSVs| individual_dossiers
+    whale_csv -.-> individual_dossiers
+    chase_csv -.-> individual_dossiers
+    op_csv -.-> individual_dossiers
+
+    subgraph prepare_dashboard["Dashboard Data Preparation"]
+        prepare[prepare_dashboard_data.py]
+        dashboard_data[dashboard_data.json]
+    end
+
+    whale_csv --> prepare
+    ts_csv --> prepare
+    hourly_csv --> prepare
+    chase_csv --> prepare
+    op_csv --> prepare
+    heatmap_csv --> prepare
+    prepare --> dashboard_data
+
+    subgraph generate_dashboard_html["Main BI Console Generation"]
+        gen_bi[generate_dashboard_html.py]
+        sections[sections/*<br/>(nav, tabs, slides, dossier.js)]
+        bi_dashboard[bi_dashboard.html<br/>(Oriental Gaming Title BI & Risk Intelligence Console)]
+    end
+
+    dashboard_data --> gen_bi
+    all_players_index_agg --> gen_bi
+    individual_dossiers --> gen_bi
+    sections --> gen_bi
+    gen_bi --> bi_dashboard
+
+    %% Parallel Behavior Flow
+    subgraph BehaviorFlow["Behavior Dashboard Flow"]
+        gen_behavior[generate_behavior_dashboard_html.py]
+        player_behavior_dashboard[player_behavior_dashboard.html]
+        inject_dossier_tabs[inject_dossier_tabs.py]
+        dossier_enabled_behavior[("dossier-enabled<br/>player_behavior_dashboard.html")]
+    end
+
+    player_behavior_data --> gen_behavior
+    gen_behavior --> player_behavior_dashboard
+    player_behavior_dashboard --> inject_dossier_tabs
+    all_players_index_agg --> inject_dossier_tabs
+    individual_dossiers --> inject_dossier_tabs
+    inject_dossier_tabs --> dossier_enabled_behavior
+
+    %% Probability & HE Flow
+    subgraph ProbabilityFlow["Probability & HE Console Flow"]
+        mnt_game_probability_he[("mnt_game_probability_he_<br/>YYYYMMDD.csv<br/>(data\\probability\\)")]
+        probability_he_ingest[probability_he_ingest.py]
+        game_probability_he_data[game_probability_he_data.json]
+        generate_probability_dashboard_html[generate_probability_dashboard_html.py]
+        game_probability_dashboard[game_probability_dashboard.html]
+    end
+
+    mnt_game_probability_he --> probability_he_ingest
+    probability_he_ingest --> game_probability_he_data
+    game_probability_he_data --> generate_probability_dashboard_html
+    generate_probability_dashboard_html --> game_probability_dashboard
+
+    %% Runtime Note
+    runtime_note[["RUNTIME (browser):<br/>bi_dashboard.html embeds index + operator dossiers;<br/>player card click lazy-loads chunk_NNNN.js<br/>from dossier_chunks\\;<br/>4 dashboards share dashboard-common.css"]]
+
+    bi_dashboard -.-> runtime_note
+    dossier_enabled_behavior -.-> runtime_note
+    game_probability_dashboard -.-> runtime_note
+
+    classDef raw fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef script fill:#bbf,stroke:#333,stroke-width:1px;
+    classDef derived fill:#bfb,stroke:#333,stroke-width:1px;
+    classDef output fill:#ff9,stroke:#333,stroke-width:2px;
+    classDef runtime fill:#f99,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5;
+
+    class raw_exports,mnt_game_probability_he raw;
+    class whale,ts,chase,op,heatmap,behavior_ingest,dossier_build,prepare,gen_bi,gen_behavior,inject_dossier_tabs,probability_he_ingest,generate_probability_dashboard_html script;
+    class whale_csv,ts_csv,hourly_csv,chase_csv,op_csv,heatmap_csv,player_behavior_data,all_players_index,all_players_index_agg,chunks_js,individual_dossiers,dashboard_data,game_probability_he_data derived;
+    class bi_dashboard,player_behavior_dashboard,dossier_enabled_behavior,game_probability_dashboard output;
+    class runtime_note runtime;
+```
+
+RUNTIME (browser): `bi_dashboard.html` embeds the index + operator dossiers; each player card click lazy-loads its `chunk_NNNN.js` from `dossier_chunks\`. The four dashboard HTML files link to one another via shared `dashboard-common.css` stylesheet.
 
 
 
