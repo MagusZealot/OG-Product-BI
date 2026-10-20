@@ -335,225 +335,282 @@ message, progress, details}. The standalone viewer.html polls this file.
 ### A. RAW-DATA INGESTION & ANALYSIS  (src/ingest/ — read data\raw\)
 ─────────────────────────────────────────────────────────────
 
-• whale_tracking.py            [pipeline step 1]
-    Params: FOLDER=data\raw, REPORT_DIR=output, PROGRESS_FILE=output\progress.json.
-    Streams all 27 exports, converts debit_amount to PHP (date-relative rate)
-    and maps currency to country. Ranks players by total PHP debit, finds the
-    Pareto cutoff (smallest top-cohort whose cumulative debit >= 80% of the
-    grand total), takes the top 20 whales, estimates session lengths from
-    paired timestamps.
-    Output: whale_analysis.csv (20 rows — player_id, total_debit, total_bets,
-             avg_session_hours, session_count, countries)
-    Skip-guard: skipped by the wrapper if whale_analysis.csv already exists.
+<details>
+<summary><strong>whale_tracking.py</strong> [pipeline step 1]</summary>
 
-• time_series_analysis.py      [pipeline step 2]
-    Params: FOLDER=data\raw, REPORT_DIR=output.
-    Streams all 27 exports, parses formatted_debit_at, buckets bets per hour
-    globally and per country (country derived from currency via
-    currency_converter.CURRENCY_COUNTRY).
-    Outputs: time_series_analysis.csv (country x total/peak-hour/peak share),
-             hourly_traffic.csv (24h global bet curve)
-    Skip-guard: skipped by the wrapper if both CSVs already exist.
+**Params:** FOLDER=data\raw, REPORT_DIR=output, PROGRESS_FILE=output\progress.json.  
+**Description:** Streams all 27 exports, converts debit_amount to PHP (date-relative rate) and maps currency to country. Ranks players by total PHP debit, finds the Pareto cutoff (smallest top-cohort whose cumulative debit >= 80% of the grand total), takes the top 20 whales, estimates session lengths from paired timestamps.  
+**Output:** whale_analysis.csv (20 rows — player_id, total_debit, total_bets, avg_session_hours, session_count, countries)  
+**Skip-guard:** skipped by the wrapper if whale_analysis.csv already exists.
 
-• chaser_detection.py          [pipeline step 3]
-    Params: FOLDER=data\raw, REPORT_DIR=output.
-    Streams all 27 exports, converts winlose/debit to PHP, builds each
-    player's chronological (timestamp, winlose, debit) sequence. Flags a
-    "chase event" when 3+ consecutive losing rounds (winlose < 0) are followed
-    by a debit spike >= 3x the average debit of the losing streak. Reports the
-    worst (highest spike multiplier) event per player.
-Output: chaser_detection.csv (25,263 rows — player_id, total_bets,
-              chase_events, max_consecutive_losses, avg_loss_debit, spike_debit,
-              spike_multiplier, total_debit, total_winlose), sorted by
-              spike_multiplier desc.
-NOTE: post-regeneration (regenerate_summary_csvs.py) the CSV holds every
-      player with >=10 bets, not just those meeting the 3-loss + 3x spike chase
-      threshold. dashboard_data.json now counts rows from the CSV at build time
-      (total_chasers = 25,263), so all pct fields in loss_streak_distribution
-      use the live denominator.
-    Skip-guard: skipped by the wrapper if chaser_detection.csv already exists.
+</details>
 
-• operator_analysis.py         [pipeline step 4]
-    Params: FOLDER=data\raw, REPORT_DIR=output.
-    Streams all 27 exports, converts to PHP, aggregates winlose/debit/bet
-    counts, unique players and countries per operator_name. Derives
-    Operator_ROI_% = (debit + winlose) / debit * 100 and Avg_Bet.
-    Output: operator_performance.csv (750 rows — Operator, Total_Bets,
-             Total_Debit, Total_Winlose, Operator_ROI_%, Avg_Bet,
-             Unique_Players, Countries), sorted by Total_Debit desc.
-    Skip-guard: skipped by the wrapper if operator_performance.csv already exists.
+<details>
+<summary><strong>time_series_analysis.py</strong> [pipeline step 2]</summary>
 
-• generate_heatmap_matrix.py   [pipeline step 5]
-    Params: FOLDER=data\raw, REPORT_DIR=output. Reads ALL "*.csv".
-    Builds country x 24-hour bet-count matrix from currency +
-    formatted_debit_at.
-    Output: country_hourly_heatmap.csv
-    Skip-guard: skipped by the wrapper if country_hourly_heatmap.csv already
-    exists and is newer than all raw CSV exports.
+**Params:** FOLDER=data\raw, REPORT_DIR=output.  
+**Description:** Streams all 27 exports, parses formatted_debit_at, buckets bets per hour globally and per country (country derived from currency via currency_converter.CURRENCY_COUNTRY).  
+**Outputs:** time_series_analysis.csv (country x total/peak-hour/peak share), hourly_traffic.csv (24h global bet curve)  
+**Skip-guard:** skipped by the wrapper if both CSVs already exist.
 
-• build_all_players_dossiers.py  [pipeline step 6 — ALL-PLAYERS DOSSIER BUILDER]
-    Params: FOLDER=data\raw, REPORT_DIR=output, CHUNK_SIZE=1000,
-            MAX_WORKERS=min(available CPUs bounded to 2..4).
-    Processes each export independently in two passes. Step 1 streams rows,
-    uses currency_converter.convert_to_php() with its currency/date rate cache,
-    aggregates compact telemetry (bets, money totals, game/operator/device
-    mixes, hourly counts, recent rounds), and immediately atomically writes
-    all_players_index_XX.json. It does not keep full balance histories.
-    Step 2 rereads that export into per-player typed arrays (array('q') times,
-    array('d') balances, array('b') win/lose signs), skips sorting when
-    time_order_ok is true, then asynchronously writes
-    dossier_chunks_XX/chunk_NNNN.js (window.DOSSIER_CHUNK_NNNN keyed by pid).
-    Per-player detail now includes timestamps[] array (Unix seconds per round)
-    for the Monthly Activity Calendar. Existing per-file indexes and complete
-    expected chunk sets are skipped on rerun. The large merged JSON is disabled
-    by default; set BUILD_DOSSIER_MONOLITH=1 to emit optional per-export
-    all_players_dossiers_XX.json files.
-    Skip-guard: skipped by the wrapper if all 27 per-export indexes and
-    their complete chunk sets exist and are newer than their source exports.
+</details>
 
-• generate_player_behavior_data.py  [pipeline step 7]
-    Params: FOLDER=data\raw, REPORT_DIR=output. Randomly samples 5
-    "*EXPORT_CSV*.csv" files from all 27 exports using random.sample().
-    Computes game stats, hourly credit/win, device split, balance tiers,
-    bet brackets, inter-bet intervals, win/loss bet progression.
-    Logs the 5 randomly selected filenames for traceability.
-    Output: player_behavior_data.json
-    Skip-guard: skipped by the wrapper if player_behavior_data.json exists
-    and is newer than the sampled raw exports.
+<details>
+<summary><strong>chaser_detection.py</strong> [pipeline step 3]</summary>
 
-• build_individual_dossiers.py  [pipeline step 8]
-    Params: FOLDER=data\raw, REPORT_DIR=output. Reads whale/chaser/
-    operator CSVs + FIRST 5 exports. Compiles 42 per-player and 35
-    per-operator detailed dossier profiles (game mix, hourly load,
-    device split, top players, hold margin).
-    Output: individual_dossiers_data.json
-    Skip-guard: skipped by the wrapper if individual_dossiers_data.json
-    exists and is newer than its dependencies (whale/chaser/operator CSVs
-    and first 5 exports).
+**Params:** FOLDER=data\raw, REPORT_DIR=output.  
+**Description:** Streams all 27 exports, converts winlose/debit to PHP, builds each player's chronological (timestamp, winlose, debit) sequence. Flags a "chase event" when 3+ consecutive losing rounds (winlose < 0) are followed by a debit spike >= 3x the average debit of the losing streak. Reports the worst (highest spike multiplier) event per player.  
+**Output:** chaser_detection.csv (25,263 rows — player_id, total_bets, chase_events, max_consecutive_losses, avg_loss_debit, spike_debit, spike_multiplier, total_debit, total_winlose), sorted by spike_multiplier desc.  
+**Note:** post-regeneration (regenerate_summary_csvs.py) the CSV holds every player with >=10 bets, not just those meeting the 3-loss + 3x spike chase threshold. dashboard_data.json now counts rows from the CSV at build time (total_chasers = 25,263), so all pct fields in loss_streak_distribution use the live denominator.  
+**Skip-guard:** skipped by the wrapper if chaser_detection.csv already exists.
 
-• probability_he_ingest.py     [pipeline step 13]
-    Fetches dated CSV snapshots from the published probability/HE feed into
-    data\probability\, probes backward for the newest available snapshot,
-    checks the full cached date range for missing files, and backfills newly
-    available dates. Writes _manifest.json and
-    output\game_probability_he_data.json. The payload includes daily game-type
-    series for actual/expected HE, actual/expected probability and threshold,
-    cross-game summaries, latest bet-place records, and explicitly listed
-    source gaps. The master pipeline runs this step on every invocation so
-    newer snapshots and previously missing dates are picked up automatically.
+</details>
 
-• currency_converter.py        (shared library — no standalone run)
-    CACHE_FILE=src\ingest\currency_cache.json, CACHE_TTL_DAYS=30.
-    convert_to_php(amount, currency, date_str) — date-specific rate from
-    frankfurter.app, memory+disk cached, BASE_RATES fallback (VND, TWD, MMK,
-    NPR, BDT never supported by the API -> always base rate).
-    get_country(currency) / CURRENCY_COUNTRY — currency to country map,
-    imported by every ingest script so country attribution is identical
-    everywhere. BASE_RATES covers 20 currencies; PHP is the base (1.0).
+<details>
+<summary><strong>operator_analysis.py</strong> [pipeline step 4]</summary>
 
-• inspect_behavior_metrics.py / sample_behavior_check.py /
-  sample_profile_extractor.py
-    Params: FOLDER=data\raw. Print sanity checks to stdout (no file output).
+**Params:** FOLDER=data\raw, REPORT_DIR=output.  
+**Description:** Streams all 27 exports, converts to PHP, aggregates winlose/debit/bet counts, unique players and countries per operator_name. Derives Operator_ROI_% = (debit + winlose) / debit * 100 and Avg_Bet.  
+**Output:** operator_performance.csv (750 rows — Operator, Total_Bets, Total_Debit, Total_Winlose, Operator_ROI_%, Avg_Bet, Unique_Players, Countries), sorted by Total_Debit desc.  
+**Skip-guard:** skipped by the wrapper if operator_performance.csv already exists.
 
-• advanced_analysis.py         (LEGACY monolith)
-    Superseded by the four split scripts (whale_tracking / time_series /
-    chaser_detection / operator_analysis). Runs the same 4 analyses in one
-    process in a single pass over the exports. Retained for reference;
-    NOT part of the 14-step pipeline. Same inputs/outputs as steps 1-4.
+</details>
+
+<details>
+<summary><strong>generate_heatmap_matrix.py</strong> [pipeline step 5]</summary>
+
+**Params:** FOLDER=data\raw, REPORT_DIR=output. Reads ALL "*.csv".  
+**Description:** Builds country x 24-hour bet-count matrix from currency + formatted_debit_at.  
+**Output:** country_hourly_heatmap.csv  
+**Skip-guard:** skipped by the wrapper if country_hourly_heatmap.csv already exists and is newer than all raw CSV exports.
+
+</details>
+
+<details>
+<summary><strong>build_all_players_dossiers.py</strong> [pipeline step 6 — ALL-PLAYERS DOSSIER BUILDER]</summary>
+
+**Params:** FOLDER=data\raw, REPORT_DIR=output, CHUNK_SIZE=1000, MAX_WORKERS=min(available CPUs bounded to 2..4).  
+**Description:** Processes each export independently in two passes. Step 1 streams rows, uses currency_converter.convert_to_php() with its currency/date rate cache, aggregates compact telemetry (bets, money totals, game/operator/device mixes, hourly counts, recent rounds), and immediately atomically writes all_players_index_XX.json. It does not keep full balance histories. Step 2 rereads that export into per-player typed arrays (array('q') times, array('d') balances, array('b') win/lose signs), skips sorting when time_order_ok is true, then asynchronously writes dossier_chunks_XX/chunk_NNNN.js (window.DOSSIER_CHUNK_NNNN keyed by pid). Per-player detail now includes timestamps[] array (Unix seconds per round) for the Monthly Activity Calendar. Existing per-file indexes and complete expected chunk sets are skipped on rerun. The large merged JSON is disabled by default; set BUILD_DOSSIER_MONOLITH=1 to emit optional per-export all_players_dossiers_XX.json files.  
+**Output:** all_players_index_XX.json (27 files), dossier_chunks_XX/chunk_NNNN.js (51 aggregate chunks), optional all_players_dossiers_XX.json (if BUILD_DOSSIER_MONOLITH=1)  
+**Skip-guard:** skipped by the wrapper if all 27 per-export indexes and their complete chunk sets exist and are newer than their source exports.
+
+</details>
+
+<details>
+<summary><strong>generate_player_behavior_data.py</strong> [pipeline step 7]</summary>
+
+**Params:** FOLDER=data\raw, REPORT_DIR=output. Randomly samples 5 "*EXPORT_CSV*.csv" files from all 27 exports using random.sample().  
+**Description:** Computes game stats, hourly credit/win, device split, balance tiers, bet brackets, inter-bet intervals, win/loss bet progression. Logs the 5 randomly selected filenames for traceability.  
+**Output:** player_behavior_data.json  
+**Skip-guard:** skipped by the wrapper if player_behavior_data.json exists and is newer than the sampled raw exports.
+
+</details>
+
+<details>
+<summary><strong>build_individual_dossiers.py</strong> [pipeline step 8]</summary>
+
+**Params:** FOLDER=data\raw, REPORT_DIR=output. Reads whale/chaser/operator CSVs + FIRST 5 exports.  
+**Description:** Compiles 42 per-player and 35 per-operator detailed dossier profiles (game mix, hourly load, device split, top players, hold margin).  
+**Output:** individual_dossiers_data.json  
+**Skip-guard:** skipped by the wrapper if individual_dossiers_data.json exists and is newer than its dependencies (whale/chaser/operator CSVs and first 5 exports).
+
+</details>
+
+<details>
+<summary><strong>probability_he_ingest.py</strong> [pipeline step 13]</summary>
+
+**Params:** (no hardcoded params; reads from data\probability\).  
+**Description:** Fetches dated CSV snapshots from the published probability/HE feed into data\probability\, probes backward for the newest available snapshot, checks the full cached date range for missing files, and backfills newly available dates. Writes _manifest.json and output\game_probability_he_data.json. The payload includes daily game-type series for actual/expected HE, actual/expected probability and threshold, cross-game summaries, latest bet-place records, and explicitly listed source gaps. The master pipeline runs this step on every invocation so newer snapshots and previously missing dates are picked up automatically.  
+**Output:** _manifest.json, output\game_probability_he_data.json  
+**Skip-guard:** always runs (no skip-guard) to find new snapshots and backfill gaps.
+
+</details>
+
+<details>
+<summary><strong>currency_converter.py</strong> (shared library — no standalone run)</summary>
+
+**Params:** CACHE_FILE=src\ingest\currency_cache.json, CACHE_TTL_DAYS=30.  
+**Description:** convert_to_php(amount, currency, date_str) — date-specific rate from frankfurter.app, memory+disk cached, BASE_RATES fallback (VND, TWD, MMK, NPR, BDT never supported by the API -> always base rate). get_country(currency) / CURRENCY_COUNTRY — currency to country map, imported by every ingest script so country attribution is identical everywhere. BASE_RATES covers 20 currencies; PHP is the base (1.0).  
+**Output:** (shared module; no direct file output)  
+**Skip-guard:** N/A (library)
+
+</details>
+
+<details>
+<summary><strong>inspect_behavior_metrics.py / sample_behavior_check.py / sample_profile_extractor.py</strong></summary>
+
+**Params:** FOLDER=data\raw.  
+**Description:** Print sanity checks to stdout (no file output).  
+**Output:** stdout only  
+**Skip-guard:** N/A (inspection scripts)
+
+</details>
+
+<details>
+<summary><strong>advanced_analysis.py</strong> (LEGACY monolith)</summary>
+
+**Params:** FOLDER=data\raw, REPORT_DIR=output.  
+**Description:** Superseded by the four split scripts (whale_tracking / time_series / chaser_detection / operator_analysis). Runs the same 4 analyses in one process in a single pass over the exports. Retained for reference; NOT part of the 14-step pipeline. Same inputs/outputs as steps 1-4.  
+**Output:** whale_analysis.csv, time_series_analysis.csv, hourly_traffic.csv, chaser_detection.csv, operator_performance.csv  
+**Skip-guard:** N/A (legacy, not in pipeline)
+
+</details>
 
 ### B. DASHBOARD DATA PREPARATION  (src/dashboard/ — read output/, write output/)
 ───────────────────────────────────────────────────────────────────
-  • prepare_dashboard_data.py          [pipeline step 9]
-      Params: REPORT_DIR=output. Reads whale/chaser/hourly/time_series/
-      heatmap/operator CSVs. Assembles master BI payload.
-      Output: dashboard_data.json
-      Skip-guard: skipped by the wrapper if dashboard_data.json exists
-      and is newer than all derived CSVs.
 
-  • generate_dashboard_html.py   <<< MAIN BI CONSOLE GENERATOR >>>  [pipeline step 10]
-      Params: DATA_FILE=output\dashboard_data.json,
-              INDEX_FILE=output\all_players_index.json (existing aggregate input),
-              DOSSIER_DATA_FILE=output\individual_dossiers_data.json,
-              SECTIONS_DIR=src\dashboard\sections\.
-      Embeds: dashboard payload + COMBINED DOSSIER PAYLOAD
-              {meta, players: ALL 50,227 index entries,
-               operators: 35 detailed operator dossiers} into
-              <script id="dossier-raw-data">. Injects section components
-              (nav buttons, tabs 6/7, slides 7/8, dossier.js module).
-      Output: output\bi_dashboard.html (~10.6 MB, Oriental Gaming Title BI & Risk Intelligence Console)
-      Skip-guard: skipped by the wrapper if bi_dashboard.html exists
-      and is newer than dashboard_data.json, individual_dossiers_data.json,
-      and all per-export all_players_index_XX.json files.
+<details>
+<summary><strong>prepare_dashboard_data.py</strong> [pipeline step 9]</summary>
 
-  • generate_behavior_dashboard_html.py  [pipeline step 11]
-      Params: REPORT_DIR=output, DATA_FILE=output\player_behavior_data.json.
-      Output: player_behavior_dashboard.html (Oriental Gaming Title Player Behavioral Intelligence Console)
-      Skip-guard: skipped by the wrapper if player_behavior_dashboard.html
-      exists and is newer than player_behavior_data.json.
+**Params:** REPORT_DIR=output. Reads whale/chaser/hourly/time_series/heatmap/operator CSVs.  
+**Description:** Assembles master BI payload.  
+**Output:** dashboard_data.json  
+**Skip-guard:** skipped by the wrapper if dashboard_data.json exists and is newer than all derived CSVs.
 
-  • inject_dossier_tabs.py      [pipeline step 12]
-      Params: REPORT_DIR=output, INDEX_FILE=output\all_players_index.json (existing aggregate input),
-              DOSSIER_FILE=output\individual_dossiers_data.json,
-              SRC_HTML=output\player_behavior_dashboard.html.
-      Injects the same all-players dossier system into the behavior
-      dashboard (output\player_behavior_dashboard.html is the POST-injection
-      version after step 12; re-run to upgrade).
-      Skip-guard: skipped by the wrapper if player_behavior_dashboard.html
-      (post-injection) exists and is newer than all_players_index.json and
-      individual_dossiers_data.json.
+</details>
 
-   • generate_probability_dashboard_html.py  [pipeline step 14]
-       Params: output\game_probability_he_data.json.
-       Generates a standalone ECharts dashboard with cross-game HE/probability
-       comparisons, selected-game time series, threshold monitoring, and a
-       latest-day actual-probability/actual-HE scatter by bet place. Displays
-       missing snapshot dates and links to both existing dashboards.
-       The two selected-game trend charts ("HE trend for selected game" and
-       "Probability and threshold trend") are consolidated into ONE tabbed
-       article (id="trendPanel") using .trend-tabs / .trend-tab-btn /
-       .trend-pane classes that mimic the bi_dashboard.html .tab-pane +
-       .nav-tab.active pattern; switchTrendTab() toggles panes, updates
-       aria-selected and resizes the revealed chart. A Start Date / End Date
-       input pair sits alongside the existing game/period filters; the range is
-       applied by getDateRange()/inDateRange() inside selectedTrendValues() so
-       both trend tabs filter live, and by comparisonValues() so the two
-       cross-game comparison charts (heCompare, probCompare) re-average the
-       pooled daily values over the selected days — with the precomputed
-       game_types[].mean_* values used verbatim when no range is active. A
-       Reset button clears the range and falls back to the full payload.
-       Inputs are bounded by meta.billing_date_min / meta.billing_date_max via
-       initDateRangeBounds(). The Game type summary table stays full-history.
-       See section 9.
-       Output: output\game_probability_dashboard.html.
-       Skip-guard: skipped when the HTML is newer than its JSON payload and
-       generator; step 13 always refreshes the source data before this check.
+<details>
+<summary><strong>generate_dashboard_html.py</strong> [pipeline step 10 — MAIN BI CONSOLE GENERATOR]</summary>
+
+**Params:** DATA_FILE=output\dashboard_data.json, INDEX_FILE=output\all_players_index.json (existing aggregate input), DOSSIER_DATA_FILE=output\individual_dossiers_data.json, SECTIONS_DIR=src\dashboard\sections\.  
+**Description:** Embeds dashboard payload + COMBINED DOSSIER PAYLOAD {meta, players: ALL 50,227 index entries, operators: 35 detailed operator dossiers} into <script id="dossier-raw-data">. Injects section components (nav buttons, tabs 6/7, slides 7/8, dossier.js module).  
+**Output:** output\bi_dashboard.html (~10.6 MB, Oriental Gaming Title BI & Risk Intelligence Console)  
+**Skip-guard:** skipped by the wrapper if bi_dashboard.html exists and is newer than dashboard_data.json, individual_dossiers_data.json, and all per-export all_players_index_XX.json files.
+
+</details>
+
+<details>
+<summary><strong>generate_behavior_dashboard_html.py</strong> [pipeline step 11]</summary>
+
+**Params:** REPORT_DIR=output, DATA_FILE=output\player_behavior_data.json.  
+**Description:** Generates the Player Behavioral Intelligence Console.  
+**Output:** player_behavior_dashboard.html (Oriental Gaming Title Player Behavioral Intelligence Console)  
+**Skip-guard:** skipped by the wrapper if player_behavior_dashboard.html exists and is newer than player_behavior_data.json.
+
+</details>
+
+<details>
+<summary><strong>inject_dossier_tabs.py</strong> [pipeline step 12]</summary>
+
+**Params:** REPORT_DIR=output, INDEX_FILE=output\all_players_index.json (existing aggregate input), DOSSIER_FILE=output\individual_dossiers_data.json, SRC_HTML=output\player_behavior_dashboard.html.  
+**Description:** Injects the same all-players dossier system into the behavior dashboard (output\player_behavior_dashboard.html is the POST-injection version after step 12; re-run to upgrade).  
+**Output:** player_behavior_dashboard.html (updated with dossier tabs)  
+**Skip-guard:** skipped by the wrapper if player_behavior_dashboard.html (post-injection) exists and is newer than all_players_index.json and individual_dossiers_data.json.
+
+</details>
+
+<details>
+<summary><strong>regenerate_summary_csvs.py</strong> (helper script)</summary>
+
+**Params:** REPORT_DIR=output. Reads all_players_index.json (unified).  
+**Description:** Regenerates whale_analysis.csv and chaser_detection.csv from unified index for consistency. Computes sessions from timestamps (30-min gap), spike multipliers from balance_series. Ensures summary tabs (Whales/Chasers) use same data source as Player Dossiers tab.  
+**Output:** whale_analysis.csv, chaser_detection.csv (regenerated)  
+**Skip-guard:** N/A (manual helper; not in master pipeline)
+
+</details>
+
+<details>
+<summary><strong>generate_probability_dashboard_html.py</strong> [pipeline step 14]</summary>
+
+**Params:** output\game_probability_he_data.json.  
+**Description:** Generates a standalone ECharts dashboard with cross-game HE/probability comparisons, selected-game time series, threshold monitoring, and a latest-day actual-probability/actual-HE scatter by bet place. Displays missing snapshot dates and links to both existing dashboards. The two selected-game trend charts ("HE trend for selected game" and "Probability and threshold trend") are consolidated into ONE tabbed article (id="trendPanel") using .trend-tabs / .trend-tab-btn / .trend-pane classes that mimic the bi_dashboard.html .tab-pane + .nav-tab.active pattern; switchTrendTab() toggles panes, updates aria-selected and resizes the revealed chart. A Start Date / End Date input pair sits alongside the existing game/period filters; the range is applied by getDateRange()/inDateRange() inside selectedTrendValues() so both trend tabs filter live, and by comparisonValues() so the two cross-game comparison charts (heCompare, probCompare) re-average the pooled daily values over the selected days — with the precomputed game_types[].mean_* values used verbatim when no range is active. A Reset button clears the range and falls back to the full payload. Inputs are bounded by meta.billing_date_min / meta.billing_date_max via initDateRangeBounds(). The Game type summary table stays full-history. See section 9.  
+**Output:** output\game_probability_dashboard.html  
+**Skip-guard:** skipped when the HTML is newer than its JSON payload and generator; step 13 always refreshes the source data before this check.
+
+</details>
 
 ### C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ — read output/)
 ──────────────────────────────────────────────────────────────
-  • inspect_all_stats.py        Params: REPORT_DIR=output. Prints summary stats.
-  • inspect_operators.py        Params: csv_path=output\operator_performance.csv.
-  • analyze_retention_transactions.py
-      Params: p=output. Prints retention & bet-velocity rankings.
-  • verify_dashboard.py         Params: hardcoded output\bi_dashboard.html path.
-      Validates embedded JSON payload and JS block.
-  • verify_behavior_dashboard.py
-      Params: hardcoded player_behavior_dashboard.html path.
-  • check_js_syntax.py          Params: hardcoded bi_dashboard.html path.
-      Checks JS brace/paren balance, flags unescaped Python artifacts
-      (note: reports false-positive "double braces" on nested ECharts
-      object literals — safe to ignore when net balance is 0).
-  • link_dashboards.py          Edits generate_dashboard_html.py in place
-      (adds cross-dashboard nav link to Behavior Telemetry console).
-  • update_generator.py         Edits generate_dashboard_html.py in place
-      (lazy-init charts per tab in switchTab()).
 
-  • fix_heatmap_colors.py       Edits generate_dashboard_html.py in place
-      (logarithmic color scale for the country x 24h heatmap so the
-      full 7-color gradient is visible across the skewed bet-volume
-      distribution; previously a linear scale buried ~90% of cells
-      in the darkest band). Note: file currently not present in src/verify\.
+<details>
+<summary><strong>inspect_all_stats.py</strong></summary>
 
+**Params:** REPORT_DIR=output.  
+**Description:** Prints summary stats.  
+**Output:** stdout only  
+**Skip-guard:** N/A (inspection script)
 
+</details>
+
+<details>
+<summary><strong>inspect_operators.py</strong></summary>
+
+**Params:** csv_path=output\operator_performance.csv.  
+**Description:** Prints operator statistics.  
+**Output:** stdout only  
+**Skip-guard:** N/A (inspection script)
+
+</details>
+
+<details>
+<summary><strong>analyze_retention_transactions.py</strong></summary>
+
+**Params:** p=output.  
+**Description:** Prints retention & bet-velocity rankings.  
+**Output:** stdout only  
+**Skip-guard:** N/A (inspection script)
+
+</details>
+
+<details>
+<summary><strong>verify_dashboard.py</strong></summary>
+
+**Params:** hardcoded output\bi_dashboard.html path.  
+**Description:** Validates embedded JSON payload and JS block.  
+**Output:** stdout (validation results)  
+**Skip-guard:** N/A (verification script)
+
+</details>
+
+<details>
+<summary><strong>verify_behavior_dashboard.py</strong></summary>
+
+**Params:** hardcoded player_behavior_dashboard.html path.  
+**Description:** Validates behavior dashboard payload and structure.  
+**Output:** stdout (validation results)  
+**Skip-guard:** N/A (verification script)
+
+</details>
+
+<details>
+<summary><strong>check_js_syntax.py</strong></summary>
+
+**Params:** hardcoded bi_dashboard.html path.  
+**Description:** Checks JS brace/paren balance, flags unescaped Python artifacts (note: reports false-positive "double braces" on nested ECharts object literals — safe to ignore when net balance is 0).  
+**Output:** stdout (syntax check results)  
+**Skip-guard:** N/A (verification script)
+
+</details>
+
+<details>
+<summary><strong>link_dashboards.py</strong></summary>
+
+**Params:** (edits generate_dashboard_html.py in place).  
+**Description:** Adds cross-dashboard nav link to Behavior Telemetry console.  
+**Output:** modifies generate_dashboard_html.py  
+**Skip-guard:** N/A (utility script)
+
+</details>
+
+<details>
+<summary><strong>update_generator.py</strong></summary>
+
+**Params:** (edits generate_dashboard_html.py in place).  
+**Description:** Lazy-init charts per tab in switchTab().  
+**Output:** modifies generate_dashboard_html.py  
+**Skip-guard:** N/A (utility script)
+
+</details>
+
+<details>
+<summary><strong>fix_heatmap_colors.py</strong></summary>
+
+**Params:** (edits generate_dashboard_html.py in place).  
+**Description:** Logarithmic color scale for the country x 24h heatmap so the full 7-color gradient is visible across the skewed bet-volume distribution; previously a linear scale buried ~90% of cells in the darkest band. Note: file currently not present in src/verify\.  
+**Output:** modifies generate_dashboard_html.py  
+**Skip-guard:** N/A (utility script)
+
+</details>
 
 ---
 
