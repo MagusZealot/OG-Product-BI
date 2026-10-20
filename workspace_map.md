@@ -508,9 +508,9 @@ flowchart TD
 
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
-    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
     raw_exports[("27 Raw Exports<br/>(data\\raw\\)")]
 
     subgraph ingestion_scripts["7 Ingestion Scripts"]
