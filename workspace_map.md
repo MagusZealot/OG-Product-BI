@@ -1,68 +1,307 @@
-===============================================================================
-                            WORKSPACE MAP — August 2026
-===============================================================================
+# Workspace Map — August 2026
 
-Oriental Gaming Title: BI & Risk Intelligence Pipeline
-Transaction-level analytics for 18.2 million wagers across 50,227 players
-(27 exports; approximately 9.5 GB). Generated artifacts live in output/
-(excluded from Git). This file is the single source of truth for project
-structure, scripts, data flow, architecture, and recent changes.
+> **Project**: Oriental Gaming Title — BI & Risk Intelligence Pipeline  
+> **Scope**: Transaction-level analytics for **18.2M wagers** across **50,227 players** (27 exports, ~9.5 GB)  
+> **Outputs**: Generated artifacts in `output/` (excluded from Git)  
+> **Purpose**: Single source of truth for project structure, scripts, data flow, architecture, and recent changes
 
-!!! CRITICAL DATA SAFETY WARNING !!!
---------------------------------------------------------------------------------
-This workspace contains a transaction-level dataset of approximately 17 MILLION
-rows (18,275,592 wagers), distributed across 27 raw CSV export files
-(each 300-377 MB, ~9.5 GB total) in data\raw\. The AI must NEVER open, read,
-scan, or process these raw export files or any other data file larger than
-100 KB. Large files are listed by NAME ONLY in this document. Do not generate
-JSON dumps of the data.
+---
 
-Large files (name-only, DO NOT READ):
-  - data\raw\2026-10-0X-XX-XX-XX_EXPORT_CSV_XXXXX_XXX_0.csv  (27 raw exports)
-  - legacy output\all_players_dossiers.json (~329 MB, full merged dump)
-  - legacy output\all_players_index.json    (~9.1 MB, 50,227-player index)
-  - legacy output\dossier_chunks\chunk_0000.js ... chunk_0050.js
-    (51 files, ~180 MB; aggregate dashboard layout)
-  - output\all_players_index_XX.json and output\dossier_chunks_XX\*\
-    (new per-export indexes and chunks; sizes vary by export)
-  - output\bi_dashboard.html                (~11 MB, embeds full player index)
-  - output\chaser_detection.csv             (~2.5 MB)
-  - output\dashboard_data.json              (~145 KB)
-  - output\individual_dossiers_data.json    (~267 KB)
-  - output\player_behavior_data.json        (~221 KB)
-  Inspect these ONLY via Python scripts that print small summaries.
-===============================================================================
+## ⚠️ CRITICAL DATA SAFETY WARNING
 
+| Constraint | Details |
+|------------|---------|
+| **Dataset size** | ~17M rows (18,275,592 wagers) across 27 raw CSV exports |
+| **File sizes** | Each export: 300–377 MB (~9.5 GB total) in `data\raw\` |
+| **AI restriction** | **NEVER** open, read, scan, or process raw exports or any file > 100 KB |
+| **Large files** | Listed by **NAME ONLY** in this document |
+| **Inspection** | ONLY via Python scripts that print small summaries |
 
---------------------------------------------------------------------------------
-  0. EXPECTED COLUMNS & FILE DISCOVERY
--------------------------------------------------------------------------------
+<details>
+<summary><strong>Large files (name-only — DO NOT READ)</strong></summary>
 
-Transaction export columns (`data/raw/*.csv`):
-  player_id, operator_name, game_name, currency, debit_amount, credit_amount,
-  winlose, formatted_debit_at, device_type, bet_id
+| Path | Description | Size |
+|------|-------------|------|
+| `data\raw\2026-10-0X-XX-XX-XX_EXPORT_CSV_XXXXX_XXX_0.csv` | 27 raw exports | ~9.5 GB total |
+| `legacy output\all_players_dossiers.json` | Full merged dump | ~329 MB |
+| `legacy output\all_players_index.json` | 50,227-player index | ~9.1 MB |
+| `legacy output\dossier_chunks\chunk_0000.js ... chunk_0050.js` | 51 aggregate chunks | ~180 MB |
+| `output\all_players_index_XX.json` | Per-export indexes | Varies |
+| `output\dossier_chunks_XX\*\` | Per-export chunks | Varies |
+| `output\bi_dashboard.html` | Embeds full player index | ~11 MB |
+| `output\chaser_detection.csv` | | ~2.5 MB |
+| `output\dashboard_data.json` | | ~145 KB |
+| `output\individual_dossiers_data.json` | | ~267 KB |
+| `output\player_behavior_data.json` | | ~221 KB |
 
-Currency snapshot: `data/probability/mnt_game_probability_he_YYYYMMDD.csv` (+ _manifest.json)
-Pace snapshots: `data/round_dealer_time/` + `data/round_table_time/` (mnt_*_daily_YYYYMMDD.csv)
+</details>
 
-File discovery per pipeline step:
-  Steps 1-5    *.csv in data/raw/                        → all matching files
-  Step 6       *EXPORT_CSV*.csv in data/raw/              → each file independently
-  Step 7       Random 5 *EXPORT_CSV*.csv (random.sample)  → 5 sampled exports
-  Step 8       First 5 exports + derived CSVs              → first 5 exports only
-  Step 13      mnt_game_probability_he_YYYYMMDD.csv        → all daily snapshots
-  Step 15      round_dealer_time/ + round_table_time/      → all available snapshots
+---
 
-Adding transaction exports: place new CSVs in data/raw/; steps 1-6 discover
-them on the next pipeline run. Steps 7-8 remain limited to five exports.
-Skip guards use file modification times, so updated inputs trigger reruns.
+## Table of Contents
 
-Data files are excluded from Git because of their size (~9.5 GB).
+- [0. Expected Columns & File Discovery](#0-expected-columns--file-discovery)
+- [1. Folder Tree Diagram](#1-folder-tree-diagram)
+- [2. Python Data Scripts & Parameters](#2-python-data-scripts--parameters)
+- [3. All-Players Dossier System — Architecture](#3-all-players-dossier-system--architecture)
+- [4. Data Flow Summary](#4-data-flow-summary)
+- [5. Currency Standardization](#5-currency-standardization)
+- [6. Master Pipeline Wrapper](#6-master-pipeline-wrapper)
+- [7. Recent Changes (2026-10-09)](#7-recent-changes-2026-10-09)
+- [8. Recent Update (2026-10-12)](#8-recent-update-2026-10-12)
+- [9. Recent Update (2026-10-13) — Probability & HE Console Trend Tabs](#9-recent-update-2026-10-13--probability--he-console-trend-tabs)
 
--------------------------------------------------------------------------------
-  1. FOLDER TREE DIAGRAM
--------------------------------------------------------------------------------
--
+---
+
+## 0. Expected Columns & File Discovery
+
+### Transaction Export Columns (`data/raw/*.csv`)
+
+```
+player_id, operator_name, game_name, currency, debit_amount, credit_amount,
+winlose, formatted_debit_at, device_type, bet_id
+```
+
+### Supporting Data Files
+
+| Type | Pattern | Notes |
+|------|---------|-------|
+| Currency snapshots | `data/probability/mnt_game_probability_he_YYYYMMDD.csv` | + `_manifest.json` |
+| Dealer pace snapshots | `data/round_dealer_time/mnt_round_dealer_time_daily_YYYYMMDD.csv` | + `_manifest.json` |
+| Table pace snapshots | `data/round_table_time/mnt_round_table_time_daily_YYYYMMDD.csv` | + `_manifest.json` |
+
+### File Discovery per Pipeline Step
+
+| Step(s) | Pattern | Scope |
+|---------|---------|-------|
+| 1–5 | `*.csv` in `data/raw/` | All matching files |
+| 6 | `*EXPORT_CSV*.csv` in `data/raw/` | Each file independently |
+| 7 | Random 5 `*EXPORT_CSV*.csv` | 5 sampled exports (`random.sample`) |
+| 8 | First 5 exports + derived CSVs | First 5 exports only |
+| 13 | `mnt_game_probability_he_YYYYMMDD.csv` | All daily snapshots |
+| 15 | `round_dealer_time/` + `round_table_time/` | All available snapshots |
+
+> **Adding exports**: Place new CSVs in `data/raw/`; steps 1–6 discover them on next run. Steps 7–8 remain limited to five exports. Skip guards use file modification times.
+
+---
+
+## 1. Folder Tree Diagram
+
+```mermaid
+graph TD
+    root[August 2026/]
+    
+    root --> kilo[.kilo/]
+    kilo --> kgit[.gitignore]
+    kilo --> kjson[kilo.jsonc]
+    
+    root --> data[data/]
+    data --> prob[probability/]
+    prob --> prob_csv[mnt_game_probability_he_YYYYMMDD.csv]
+    prob --> prob_manifest[_manifest.json]
+    data --> dealer[round_dealer_time/]
+    dealer --> dealer_csv[mnt_round_dealer_time_daily_YYYYMMDD.csv]
+    dealer --> dealer_manifest[_manifest.json]
+    data --> table[round_table_time/]
+    table --> table_csv[mnt_round_table_time_daily_YYYYMMDD.csv]
+    table --> table_manifest[_manifest.json]
+    data --> raw[raw/]
+    raw --> raw_csvs[27 raw CSV exports<br/>(NAME ONLY — DO NOT READ)]
+    
+    root --> scripts[scripts/]
+    scripts --> gen_all[generate_all_dashboards.py]
+    scripts --> gen_chart[generate_chart.js]
+    
+    root --> src[src/]
+    src --> ingest[ingest/]
+    ingest --> whale[whale_tracking.py]
+    ingest --> ts[time_series_analysis.py]
+    ingest --> chase[chaser_detection.py]
+    ingest --> op[operator_analysis.py]
+    ingest --> heatmap[generate_heatmap_matrix.py]
+    ingest --> build_dossiers[build_all_players_dossiers.py]
+    ingest --> behavior[generate_player_behavior_data.py]
+    ingest --> indiv[build_individual_dossiers.py]
+    ingest --> prob_he[probability_he_ingest.py]
+    ingest --> currency[currency_converter.py]
+    ingest --> currency_cache[currency_cache.json]
+    ingest --> inspect[inspect_behavior_metrics.py]
+    ingest --> sample_check[sample_behavior_check.py]
+    ingest --> sample_extract[sample_profile_extractor.py]
+    ingest --> legacy[advanced_analysis.py (LEGACY)]
+    
+    src --> dashboard[dashboard/]
+    dashboard --> prep[prepare_dashboard_data.py]
+    dashboard --> gen_bi[generate_dashboard_html.py]
+    dashboard --> gen_behavior[generate_behavior_dashboard_html.py]
+    dashboard --> gen_prob[generate_probability_dashboard_html.py]
+    dashboard --> inject[inject_dossier_tabs.py]
+    dashboard --> regen[regenerate_summary_csvs.py]
+    dashboard --> sections[sections/]
+    sections --> nav[nav_buttons.html]
+    sections --> tab_players[tab_players.html]
+    sections --> tab_ops[tab_operators.html]
+    sections --> slides[slides.html]
+    sections --> dossier[dossier.js]
+    
+    src --> verify[verify/]
+    verify --> retention[analyze_retention_transactions.py]
+    verify --> js_check[check_js_syntax.py]
+    verify --> stats[inspect_all_stats.py]
+    verify --> ops[inspect_operators.py]
+    verify --> link[link_dashboards.py]
+    verify --> update[update_generator.py]
+    verify --> verify_bi[verify_dashboard.py]
+    verify --> verify_behavior[verify_behavior_dashboard.py]
+    
+    root --> output[output/]
+    output --> dashboards[dashboards/]
+    dashboards --> css[dashboard-common.css]
+    dashboards --> bi[bi_dashboard.html]
+    dashboards --> prob_dash[game_probability_dashboard.html]
+    dashboards --> behavior_dash[player_behavior_dashboard.html]
+    dashboards --> dealer_dash[round_dealer_table_time_dashboard.html]
+    dashboards --> viewer[viewer.html]
+    output --> data_out[data/]
+    data_out --> idx[all_players_index.json]
+    data_out --> idx_per[all_players_index_00.json ... all_players_index_26.json]
+    data_out --> dash_data[dashboard_data.json]
+    data_out --> prob_data[game_probability_he_data.json]
+    data_out --> indiv_data[individual_dossiers_data.json]
+    data_out --> behavior_data[player_behavior_data.json]
+    data_out --> dealer_data[round_dealer_table_time_data.json]
+    output --> dossiers[dossiers/]
+    dossiers --> dossiers_per[all_players_dossiers_00.json ... all_players_dossiers_26.json]
+    output --> chunks[chunks/]
+    chunks --> agg_chunks[dossier_chunks/<br/>chunk_0000.js ... chunk_0050.js]
+    chunks --> per_chunks[dossier_chunks_00/ ... dossier_chunks_26/]
+    output --> progress[progress/]
+    progress --> prog_json[progress.json]
+    output --> reports[reports/]
+    reports --> chaser_csv[chaser_detection.csv]
+    reports --> heatmap_csv[country_hourly_heatmap.csv]
+    reports --> hourly_csv[hourly_traffic.csv]
+    reports --> op_csv[operator_performance.csv]
+    reports --> ts_csv[time_series_analysis.csv]
+    reports --> whale_csv[whale_analysis.csv]
+    
+    root --> docs[docs/]
+    docs --> log[analysis_log.txt]
+    
+    root --> analysis_reports[analysis_reports/ (LEGACY/EMPTY)]
+    root --> wmap[workspace_map.md]
+```
+
+<details>
+<summary><strong>ASCII tree (legacy reference)</strong></summary>
+
+```
+August 2026/                                     (workspace root)
+│
+├── .kilo/                                       (Kilo agent config)
+│   ├── .gitignore
+│   └── kilo.jsonc
+│
+├── data/
+    │   ├── probability/                                 (cached published game probability snapshots)
+    │   │   ├── mnt_game_probability_he_YYYYMMDD.csv
+    │   │   └── _manifest.json                           (scan range and unavailable dates)
+    │   ├── round_dealer_time/                            (cached daily dealer pace snapshots)
+    │   │   ├── mnt_round_dealer_time_daily_YYYYMMDD.csv
+    │   │   └── _manifest.json
+    │   ├── round_table_time/                             (cached daily table pace snapshots)
+    │   │   ├── mnt_round_table_time_daily_YYYYMMDD.csv
+    │   │   └── _manifest.json
+    │   └── raw/                                         (27 raw CSV exports — NAME ONLY)
+    │       ├── 2026-10-06-13-38-11_EXPORT_CSV_45625_808_0.csv
+    │       ├── 2026-10-06-14-02-59_EXPORT_CSV_45627_085_0.csv
+    │       ├── ... (25 more, 2026-10-06 through 2026-10-07) ...
+    │       └── 2026-10-07-17-46-44_EXPORT_CSV_45680_721_0.csv
+    │
+|-- scripts/ (pipeline entry point and chart helper)
+  |   |-- generate_all_dashboards.py (18-step master wrapper; section 6)
+  |   `-- generate_chart.js
+├── src/                                               (ALL Python data scripts)
+│   ├── ingest/                                        (raw-data ingestion & analysis)
+│   │   ├── advanced_analysis.py                       (LEGACY monolith: all 4 analyses in one process — superseded by the four split scripts below; kept for reference)
+│   │   ├── whale_tracking.py                          (step 1: Pareto top-20% by debit)
+│   │   ├── time_series_analysis.py                    (step 2: country peak-hour + hourly traffic)
+│   │   ├── chaser_detection.py                        (step 3: problem-gambling flags)
+│   │   ├── operator_analysis.py                       (step 4: operator profitability)
+│   │   ├── generate_heatmap_matrix.py                 (step 5: country x 24h bet matrix)
+│   │   ├── build_all_players_dossiers.py              (step 6: two-pass per-file index + trajectory chunks)
+│   │   ├── generate_player_behavior_data.py           (step 7: behavior telemetry)
+│   │   ├── build_individual_dossiers.py               (step 8: curated player/operator dossiers)
+│   │   ├── probability_he_ingest.py                   (step 13: fetch/backfill daily probability snapshots)
+│   │   ├── currency_converter.py                      (shared module: PHP conversion + country map)
+│   │   ├── currency_cache.json                        (cached historical FX rates, 30-day TTL)
+│   │   ├── inspect_behavior_metrics.py
+│   │   ├── sample_behavior_check.py
+│   │   └── sample_profile_extractor.py
+│   ├── dashboard/                                     (dashboard data prep & rendering)
+│   │   ├── prepare_dashboard_data.py                  (step 9: master BI payload)
+│   │   ├── generate_dashboard_html.py                 (step 10: MAIN BI console)
+│   │   ├── generate_behavior_dashboard_html.py        (step 11: behavior console)
+│   │   ├── generate_probability_dashboard_html.py     (step 14: probability & HE console)
+│   │   ├── inject_dossier_tabs.py                     (step 12: dossier tabs in behavior console)
+│   │   ├── regenerate_summary_csvs.py                 (helper: regenerates whale/chaser CSVs from unified index for consistency)
+│   │   └── sections/                                  (reusable HTML/JS components)
+│   │       ├── nav_buttons.html                       (nav buttons for tabs 6 & 7)
+│   │       ├── tab_players.html                       (Tab 6: ALL-player browser UI)
+│   │       ├── tab_operators.html                     (Tab 7: operator dossiers UI)
+│   │       ├── slides.html                            (presentation slides 7 & 8)
+│   │       └── dossier.js                             (dossier module: index + chunk loader)
+│   └── verify/                                        (inspection / verification)
+│       ├── analyze_retention_transactions.py
+│       ├── check_js_syntax.py
+│       ├── inspect_all_stats.py
+│       ├── inspect_operators.py
+│       ├── link_dashboards.py
+│       ├── update_generator.py
+│       ├── verify_behavior_dashboard.py
+│       └── verify_dashboard.py
+│
+|-- output/ (generated artifacts)
+  |   |-- dashboards/
+  |   |   |-- dashboard-common.css   # Shared stylesheet (consistent look across all dashboards)
+  |   |   |-- bi_dashboard.html
+  |   |   |-- game_probability_dashboard.html
+  |   |   |-- player_behavior_dashboard.html
+  |   |   |-- round_dealer_table_time_dashboard.html
+  |   |   `-- viewer.html
+  |   |-- data/
+  |   |   |-- all_players_index.json
+  |   |   |-- all_players_index_00.json ... all_players_index_26.json
+  |   |   |-- dashboard_data.json
+  |   |   |-- game_probability_he_data.json
+  |   |   |-- individual_dossiers_data.json
+  |   |   |-- player_behavior_data.json
+  |   |   `-- round_dealer_table_time_data.json
+  |   |-- dossiers/
+  |   |   `-- all_players_dossiers_00.json ... all_players_dossiers_26.json
+  |   |-- chunks/
+  |   |   |-- dossier_chunks/                            (aggregate chunks; chunk_0000.js ... chunk_0050.js)
+  |   |   |-- dossier_chunks_00/ ... dossier_chunks_26/  (per-export chunks)
+  |   |-- progress/
+  |   |   `-- progress.json
+  |   `-- reports/
+  |       |-- chaser_detection.csv
+  |       |-- country_hourly_heatmap.csv
+  |       |-- hourly_traffic.csv
+  |       |-- operator_performance.csv
+  |       |-- time_series_analysis.csv
+  |       `-- whale_analysis.csv
+  |
+├── docs/
+│   └── analysis_log.txt                               (run log)
+│
+├── analysis_reports/                                (LEGACY/EMPTY — outputs moved to output/)
+└── workspace_map.md                                (this file)
+```
+
+</details>
+
+---
 
  August 2026/                                     (workspace root)
  │
