@@ -9,35 +9,34 @@
 
 ---
 
-## ⚠️ CRITICAL DATA SAFETY WARNING {#critical-data-safety-warning}
-
-
-| Constraint | Details |
-|------------|---------|
-| **Dataset size** | ~17M rows (18,275,592 wagers) across 27 raw CSV exports |
-| **File sizes** | Each export: 300–377 MB (~9.5 GB total) in `data\raw\` |
-| **AI restriction** | **NEVER** open, read, scan, or process raw exports or any file > 100 KB |
-| **Large files** | Listed by **NAME ONLY** in this document |
-| **Inspection** | ONLY via Python scripts that print small summaries |
-
-<details>
-<summary><strong>Large files (name-only — DO NOT READ)</strong></summary>
-
-| Path | Description | Size |
-|------|-------------|------|
-| `data\raw\2026-10-0X-XX-XX-XX_EXPORT_CSV_XXXXX_XXX_0.csv` | 27 raw exports | ~9.5 GB total |
-| `legacy output\all_players_dossiers.json` | Full merged dump | ~329 MB |
-| `legacy output\all_players_index.json` | 50,227-player index | ~9.1 MB |
-| `legacy output\dossier_chunks\chunk_0000.js ... chunk_0050.js` | 51 aggregate chunks | ~180 MB |
-| `output\all_players_index_XX.json` | Per-export indexes | Varies |
-| `output\dossier_chunks_XX\*\` | Per-export chunks | Varies |
-| `output\bi_dashboard.html` | Embeds full player index | ~11 MB |
-| `output\chaser_detection.csv` | | ~2.5 MB |
-| `output\dashboard_data.json` | | ~145 KB |
-| `output\individual_dossiers_data.json` | | ~267 KB |
-| `output\player_behavior_data.json` | | ~221 KB |
-
-</details>
+> ⚠️ **CRITICAL DATA SAFETY WARNING** {#critical-data-safety-warning}
+>
+> | Constraint | Details |
+> |------------|---------|
+> | **Dataset size** | ~17M rows (18,275,592 wagers) across 27 raw CSV exports |
+> | **File sizes** | Each export: 300–377 MB (~9.5 GB total) in `data\raw\` |
+> | **AI restriction** | **NEVER** open, read, scan, or process raw exports or any file > 100 KB |
+> | **Large files** | Listed by **NAME ONLY** in this document |
+> | **Inspection** | ONLY via Python scripts that print small summaries |
+>
+> <details>
+> <summary><strong>Large files (name-only — DO NOT READ)</strong></summary>
+>
+> | Path | Description | Size |
+> |------|-------------|------|
+> | `data\raw\2026-10-0X-XX-XX-XX_EXPORT_CSV_XXXXX_XXX_0.csv` | 27 raw exports | ~9.5 GB total |
+> | `legacy output\all_players_dossiers.json` | Full merged dump | ~329 MB |
+> | `legacy output\all_players_index.json` | 50,227-player index | ~9.1 MB |
+> | `legacy output\dossier_chunks\chunk_0000.js ... chunk_0050.js` | 51 aggregate chunks | ~180 MB |
+> | `output\all_players_index_XX.json` | Per-export indexes | Varies |
+> | `output\dossier_chunks_XX\*\` | Per-export chunks | Varies |
+> | `output\bi_dashboard.html` | Embeds full player index | ~11 MB |
+> | `output\chaser_detection.csv` | | ~2.5 MB |
+> | `output\dashboard_data.json` | | ~145 KB |
+> | `output\individual_dossiers_data.json` | | ~267 KB |
+> | `output\player_behavior_data.json` | | ~221 KB |
+>
+> </details>
 
 ---
 
