@@ -2,7 +2,7 @@
 
 ## MANDATORY: Read workspace map first
 
-Before doing ANY work in this repository, you MUST read `workspace_map.txt` at the repository root. This is non-negotiable and must happen at the start of every coding agent session.
+Before doing ANY work in this repository, you MUST read `workspace_map.md` at the repository root. This is non-negotiable and must happen at the start of every coding agent session.
 
 The workspace map contains critical information:
 
@@ -18,7 +18,7 @@ The workspace map contains critical information:
   - Implementer worktrees are created per-ticket under `t<N>-*` directories; clean up with `git worktree remove --force <path>`
   - Lint check runs via `scripts/generate_all_dashboards.py` before pipeline steps; ruff config at `pyproject.toml`
 
-**Do not proceed with planning, searching, or making changes until you have read and understood `workspace_map.txt`.**
+**Do not proceed with planning, searching, or making changes until you have read and understood `workspace_map.md`.**
 
 ## Agent skills
 

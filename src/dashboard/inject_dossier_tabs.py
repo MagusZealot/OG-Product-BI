@@ -21,11 +21,11 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 # src/dashboard -> go up 2 levels to reach workspace root
 WORKSPACE = SCRIPT_DIR.parent.parent
 
-# Fallback: look for workspace_map.txt to confirm
-if not (WORKSPACE / "workspace_map.txt").exists():
+# Fallback: look for workspace_map.md to confirm
+if not (WORKSPACE / "workspace_map.md").exists():
     # Try to find by walking up further
     for parent in WORKSPACE.parents:
-        if (parent / "workspace_map.txt").exists():
+        if (parent / "workspace_map.md").exists():
             WORKSPACE = parent
             break
 

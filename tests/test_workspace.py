@@ -40,7 +40,7 @@ class TestWorkspaceModule(unittest.TestCase):
     def test_paths_resolve_to_workspace_root(self):
         ws = self._import_workspace_from("ingest")
         self.assertEqual(ws.WORKSPACE, WORKSPACE_ROOT)
-        self.assertTrue((ws.WORKSPACE / "workspace_map.txt").exists())
+        self.assertTrue((ws.WORKSPACE / "workspace_map.md").exists())
         self.assertEqual(ws.RAW_DIR, WORKSPACE_ROOT / "data" / "raw")
         self.assertEqual(ws.OUTPUT_DIR, WORKSPACE_ROOT / "output")
         self.assertEqual(ws.PROGRESS_FILE, WORKSPACE_ROOT / "output" / "progress.json")

@@ -15,9 +15,9 @@ from datetime import datetime
 from pathlib import Path
 
 WORKSPACE = Path(__file__).resolve().parent
-if not (WORKSPACE / "workspace_map.txt").exists():
+if not (WORKSPACE / "workspace_map.md").exists():
     for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
+        if (_parent / "workspace_map.md").exists():
             WORKSPACE = _parent
             break
 

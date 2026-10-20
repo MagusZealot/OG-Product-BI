@@ -170,7 +170,7 @@ Data files are excluded from Git because of their size (~9.5 GB).
  │   └── analysis_log.txt                               (run log)
  │
  ├── analysis_reports/                                (LEGACY/EMPTY — outputs moved to output/)
- └── workspace_map.txt                                (this file)
+ └── workspace_map.md                                (this file)
 
 
 --------------------------------------------------------------------------------

@@ -9,9 +9,9 @@ import json
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 WORKSPACE = SCRIPT_DIR
-if not (WORKSPACE / "workspace_map.txt").exists():
+if not (WORKSPACE / "workspace_map.md").exists():
     for _parent in WORKSPACE.parents:
-        if (_parent / "workspace_map.txt").exists():
+        if (_parent / "workspace_map.md").exists():
             WORKSPACE = _parent
             break
 
