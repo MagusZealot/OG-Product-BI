@@ -626,6 +626,44 @@ then builds trajectories and writes that export's lazy-load chunks in pass
 two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
+```mermaid
+flowchart TD
+    subgraph Build["Build Process (build_all_players_dossiers.py)"]
+        Pass1[Pass 1: Stream & Aggregate]
+        Pass2[Pass 2: Build Trajectories]
+    end
+
+    subgraph Outputs["Per-Export Outputs"]
+        Index[(all_players_index_XX.json)]
+        Chunks[dossier_chunks_XX/chunk_NNNN.js]
+    end
+
+    subgraph Runtime["Browser Runtime (bi_dashboard.html)"]
+        Embedded[Embedded Index + Operators]
+        LazyLoad[Lazy-load Chunks]
+        Detail[Dossier Detail Panel]
+    end
+
+    RawExports[("27 Raw Exports\n(data\\raw\\)")] --> Pass1
+    Pass1 --> Index
+    Index --> Pass2
+    Pass2 --> Chunks
+    Index --> Embedded
+    Chunks --> LazyLoad
+    Embedded --> Detail
+    LazyLoad --> Detail
+
+    classDef build fill:#bbf,stroke:#333;
+    classDef output fill:#bfb,stroke:#333;
+    classDef runtime fill:#ff9,stroke:#333;
+    classDef raw fill:#f9f,stroke:#333,stroke-width:2px;
+
+    class Pass1,Pass2 build;
+    class Index,Chunks output;
+    class Embedded,LazyLoad,Detail runtime;
+    class RawExports raw;
+```
+
 <details>
 <summary><strong>Embedded payload (bi_dashboard.html)</strong></summary>
 
@@ -1057,16 +1095,13 @@ flowchart TD
 
 ---
 
-<details>
-<summary>2026-10-09 — Recent Changes</summary>
-
 ## 7. RECENT CHANGES (2026-10-09) {#7-recent-changes-2026-10-09}
 
 
 Fixed data consistency and completeness issues identified during dashboard audit:
 
 <details>
-<summary>1. FIXED: merge_per_file_dossiers() in generate_dashboard_html.py</summary>
+<summary><strong>1. FIXED: merge_per_file_dossiers() in generate_dashboard_html.py</strong></summary>
 
 1. FIXED: merge_per_file_dossiers() in generate_dashboard_html.py
    - Previously: Only used first chunk's detail for each player (dropped multi-file trajectories)
@@ -1211,7 +1246,6 @@ Fixed data consistency and completeness issues identified during dashboard audit
 
 
 ---
-</details>
 </details>
 <details>
 <summary>2026-10-12 — Pipeline Location & Probability/House-Edge Snapshot Cache</summary>
