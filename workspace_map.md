@@ -1057,44 +1057,78 @@ flowchart TD
 
 ---
 
+<details>
+<summary>2026-10-09 — Recent Changes</summary>
+
 ## 7. RECENT CHANGES (2026-10-09) {#7-recent-changes-2026-10-09}
 
 
 Fixed data consistency and completeness issues identified during dashboard audit:
 
+<details>
+<summary>1. FIXED: merge_per_file_dossiers() in generate_dashboard_html.py</summary>
+
 1. FIXED: merge_per_file_dossiers() in generate_dashboard_html.py
    - Previously: Only used first chunk's detail for each player (dropped multi-file trajectories)
    - Now: Concatenates trajectories from all source chunks chronologically by timestamps
    - Result: All 19,045 multi-file players now have merged balance_series, timestamps, games, hours, recent_rounds
+</details>
+
+<details>
+<summary>2. REGENERATED: Unified index and chunks (all_players_index.json + dossier_chunks/)</summary>
 
 2. REGENERATED: Unified index and chunks (all_players_index.json + dossier_chunks/)
    - Correct totals for all 50,227 players
    - Player ZR_62633509_15105215938: 799 bets across Aug 20 & 28 now in merged chunk
    - Monthly Activity Calendar now shows all dates from merged timestamps
+</details>
+
+<details>
+<summary>3. CREATED: src/dashboard/regenerate_summary_csvs.py</summary>
 
 3. CREATED: src/dashboard/regenerate_summary_csvs.py
    - Regenerates whale_analysis.csv and chaser_detection.csv from unified index
    - Ensures summary tabs (Whales/Chasers) use same data source as Player Dossiers tab
    - Computes sessions from timestamps (30-min gap), spike multipliers from balance_series
+</details>
+
+<details>
+<summary>4. FIXED: Whale/Chaser data consistency (0 mismatches)</summary>
 
 4. FIXED: Whale/Chaser data consistency (0 mismatches)
    - Before: 20/20 whales and 10/10 chasers mismatched (different aggregation pipelines)
    - After: All CSV totals match unified index exactly
+</details>
+
+<details>
+<summary>5. FIXED: whale_analysis.csv limited to top 20</summary>
 
 5. FIXED: whale_analysis.csv limited to top 20
    - VIP Whales tab now shows exactly 20 players (was showing all 50,227)
+</details>
+
+<details>
+<summary>6. ADDED: Whale Group Dossier in Tab 1 (VIP Whales)</summary>
 
 6. ADDED: Whale Group Dossier in Tab 1 (VIP Whales)
    - Aggregate KPI strip: Total Debit (7.27B), Total Wagers (123,924), Avg Session (0.74h), Countries (4), Casino Concentration (42.3%)
    - Geographic Composition breakdown with country flags and debit percentages
    - Behavioral Archetypes: Lightning/Bot (sub-3min), Burst Whale, Sustained Grinder
    - 5 Key Group Insights: dominant profile, geographic concentration, top individual, volume velocity, session brevity
+</details>
+
+<details>
+<summary>7. ADDED: Chaser Group Dossier in Tab 2 (Risk & Chasers)</summary>
 
 7. ADDED: Chaser Group Dossier in Tab 2 (Risk & Chasers)
    - Aggregate KPI strip: Total Debit (22.61B), Total Flagged (25,263), Net Losers (69.1%), Net P&L (-334.6M), Peak Spike (7,500x)
    - Risk Tier Distribution: Extreme (≥1000x: 5), Critical (100-999x: 240), High (20-99x: 1,850), Moderate (5-19x: 6,522), Low (<5x: 16,646)
    - Tilt Threshold Analysis: L1-L10 loss streak breakdown with L3 (3 consecutive losses) highlighted as PEAK trigger (11.2%)
    - 5 Key Risk Insights: loss-streak tipping point, financial destructiveness, extreme risk cohort, streak escalation, net winner anomaly
+</details>
+
+<details>
+<summary>8. FIXED: "Loss Thresholds: The 'Tilt' Curve" chart (Tab 2, initChaserTiltChart)</summary>
 
 8. FIXED: "Loss Thresholds: The 'Tilt' Curve" chart (Tab 2, initChaserTiltChart)
     - CHART SCOPE: now filters loss_streak_distribution to streak >= 3 before
@@ -1113,6 +1147,10 @@ Fixed data consistency and completeness issues identified during dashboard audit
     - Also replaced remaining hardcoded "11,978" labels across the console
       (nav badge, KPI strip, dossier subtitle, slide 1/3 text, Pillar 2 strategy)
       with live DATA.chasers-driven elements so they stay consistent.
+</details>
+
+<details>
+<summary>9. FIXED: "24-Hour Outcome Volume: Wins, Losses & Pushes" chart (Tab 1, initTimingCharts)</summary>
 
 9. FIXED: "24-Hour Outcome Volume: Wins, Losses & Pushes" chart (Tab 1, initTimingCharts)
      - BUG: All three line series (Wins, Losses, Pushes) used `stack: 'Total'`, causing
@@ -1121,6 +1159,10 @@ Fixed data consistency and completeness issues identified during dashboard audit
      - FIX: Removed `stack: 'Total'` from all three series. Each outcome now displays its
        actual hourly count independently. Added width:2 and areaStyle for clarity.
      - Files: generate_behavior_dashboard_html.py:1029-1033, output/player_behavior_dashboard.html:1013-1015
+</details>
+
+<details>
+<summary>10. ADDED: "Player Archetype Legend" card in Tab 6 (All Player Dossiers)</summary>
 
 10. ADDED: "Player Archetype Legend" card in Tab 6 (All Player Dossiers)
      - Purpose: explains every player label (VIP Whale, Low Chaser, etc.) so users
@@ -1138,6 +1180,10 @@ Fixed data consistency and completeness issues identified during dashboard audit
      - Files: src/dashboard/sections/tab_players.html, src/dashboard/sections/dossier.js,
        src/dashboard/inject_dossier_tabs.py, output/bi_dashboard.html,
        output/player_behavior_dashboard.html
+</details>
+
+<details>
+<summary>11. ADDED: Clickable archetype toggle filter on the legend cards</summary>
 
 11. ADDED: Clickable archetype toggle filter on the legend cards
      - Each legend card is now a button (cursor-pointer, Enter/Space activates,
@@ -1165,6 +1211,10 @@ Fixed data consistency and completeness issues identified during dashboard audit
 
 
 ---
+</details>
+</details>
+<details>
+<summary>2026-10-12 — Pipeline Location & Probability/House-Edge Snapshot Cache</summary>
 
 ## 8. RECENT UPDATE (2026-10-12) {#8-recent-update-2026-10-12}
 
@@ -1186,6 +1236,11 @@ Fixed data consistency and completeness issues identified during dashboard audit
 
 
 ---
+
+
+</details>
+<details>
+<summary>2026-10-13 — Probability & HE Console Trend Tabs</summary>
 
 ## 9. RECENT UPDATE (2026-10-13) — PROBABILITY & HE CONSOLE TREND TABS {#9-recent-update-2026-10-13--probability--he-console-trend-tabs}
 
@@ -1265,6 +1320,11 @@ regenerated/synced.
 
 ---
 
+
+</details>
+<details>
+<summary>2026-10-13 — Probability Console Shows All Games at Once</summary>
+
 ## 10. RECENT UPDATE (2026-10-13) — PROBABILITY CONSOLE SHOWS ALL GAMES AT ONCE {#10-recent-update-2026-10-13--probability-console-shows-all-games-at-once}
 
 
@@ -1324,6 +1384,11 @@ simultaneously, with a new combined aggregate section on top.
 
 ---
 
+
+</details>
+<details>
+<summary>2026-10-13 — Quick Nav + Threshold Breach Analytics</summary>
+
 ## 11. RECENT UPDATE (2026-10-13) — QUICK NAV + THRESHOLD BREACH ANALYTICS {#11-recent-update-2026-10-13--quick-nav-threshold-breach-analytics}
 
 
@@ -1378,6 +1443,11 @@ src\ingest\probability_he_ingest.py, pipeline step 13).
 
 
 ---
+
+
+</details>
+<details>
+<summary>2026-10-13 — Sticky Header Filters + Breach Charts</summary>
 
 ## 12. RECENT UPDATE (2026-10-13) — STICKY HEADER FILTERS + BREACH CHARTS {#12-recent-update-2026-10-13--sticky-header-filters-breach-charts}
 
@@ -1434,6 +1504,11 @@ src\dashboard\generate_probability_dashboard_html.py; no payload change).
 
 ---
 
+
+</details>
+<details>
+<summary>2026-10-13 — HE Trends Split Per Game</summary>
+
 ## 13. RECENT UPDATE (2026-10-13) — HE TRENDS SPLIT PER GAME {#13-recent-update-2026-10-13--he-trends-split-per-game}
 
 
@@ -1471,6 +1546,11 @@ pair of axes.
 
 
 ---
+
+
+</details>
+<details>
+<summary>2026-10-13 — UI Cleanup: Conditional HE + Breach Charts</summary>
 
 ## 14. RECENT UPDATE (2026-10-13) — UI CLEANUP: CONDITIONAL HE + BREACH CHARTS {#14-recent-update-2026-10-13--ui-cleanup-conditional-he-breach-charts}
 
@@ -1524,6 +1604,11 @@ change).
 
 
 ---
+
+
+</details>
+<details>
+<summary>2026-10-15 — Unified Dealer & Table Pace Console</summary>
 
 ## 15. RECENT UPDATE (2026-10-15) — UNIFIED DEALER & TABLE PACE CONSOLE {#15-recent-update-2026-10-15--unified-dealer--table-pace-console}
 
@@ -1588,4 +1673,5 @@ dashboard generator:
       Efficiency Matrix, Top/Bottom 10 Profiles, Individualized Dealer Dossier,
       Forensics Table)
 
+</details>
 EOF
