@@ -626,16 +626,29 @@ then builds trajectories and writes that export's lazy-load chunks in pass
 two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
-• Embedded payload (bi_dashboard.html, <script id="dossier-raw-data">):
+<details>
+<summary><strong>Embedded payload (bi_dashboard.html)</strong></summary>
+
+• Embedded payload (bi_dashboard.html, `<script id="dossier-raw-data">`):
     { meta: {total_players: 50227, total_rows: 18275592, files: 27,
              chunk_size: 1000, total_chunks: 51},
       players: [50,227 compact index entries — id==array position==rank,
                 sorted by total debit desc],
       operators: [35 detailed operator dossiers] }
 
+</details>
+
+<details>
+<summary><strong>Compact player index entry</strong></summary>
+
 • Compact player index entry (all_players_index_XX.json / DOSSIER.players[]):
     id (array index == rank), pid, country, arch, debit, winlose, bets,
     avg_bet, whale (bool), chaser (bool), op, spike.
+
+</details>
+
+<details>
+<summary><strong>Trajectory chunk</strong></summary>
 
 • Trajectory chunk (dossier_chunks_XX/chunk_NNNN.js,
   window.DOSSIER_CHUNK_NNNN; XX identifies the source export):
@@ -643,6 +656,11 @@ optional and disabled by default.
     timestamps[] (Unix timestamps for each round), hours[24] (bet counts per hour), games[] ({game, bets, debit,
     win_rate_pct}), devices{Mobile, Desktop}, recent_rounds[]
     ({time, game, debit, credit, winlose, balance}).
+
+</details>
+
+<details>
+<summary><strong>Tab 6 Player Dossiers (tab_players.html + dossier.js)</strong></summary>
 
 • Tab 6 "Player Dossiers" (tab_players.html + dossier.js):
     - Hero shows total profiles + "Export All Players CSV" button
@@ -656,23 +674,30 @@ optional and disabled by default.
     - Card click -> openPlayerDossier(id) (id is the INDEX ARRAY POSITION)
         -> chunkId = Math.floor(id / CHUNK_SIZE)
         -> loadDossierChunk(chunkId) lazy-loads
-           dossier_chunks/chunk_NNNN.js via injected <script> tag
+           dossier_chunks/chunk_NNNN.js via injected `<script>` tag
            (defines window.DOSSIER_CHUNK_NNNN keyed by player_id);
            concurrent requests for the same chunk share one callback queue
         -> renderDossierDetail() draws FULL balance_series, cumulative
            P&L curve (derived: balance[i] - balance[0]), hourly activity,
            game-mix pie, device split, recent-rounds forensics table
-    - Monthly Activity Calendar: interactive month grid showing active days
-      (highlighted with activity bar), click any day to expand 24-hour
-      breakdown with per-hour bet counts. Navigate months with prev/next.
     - Charts are ECharts instances disposed on close/theme-toggle;
       trajectories load ON DEMAND (chunks total ~180 MB) so the page
       stays responsive; loaded chunks are cached in window.DOSSIER_CHUNK_*
+
+</details>
+
+<details>
+<summary><strong>Tab 7 Operator Dossiers (tab_operators.html + dossier.js)</strong></summary>
 
 • Tab 7 "Operator Dossiers" (tab_operators.html + dossier.js):
     Card grid of the 35 operator dossiers (GGR, hold margin, players,
     bets/player, volume, avg bet); openOperatorDossier(idx) renders games
     bar chart, hourly load, device mix and the top-players table.
+
+</details>
+
+<details>
+<summary><strong>Entry points</strong></summary>
 
 • Entry points — every "Open" button resolves ANY of the 50,227 players:
     - openPlayerDossierById(pid, contextTab): linear-finds pid in the index,
@@ -683,18 +708,38 @@ optional and disabled by default.
       the operator bubble chart.
     - exportDossierCSV('players' | 'operators'): exports all index rows.
 
+</details>
+
+<details>
+<summary><strong>Slide deck integration</strong></summary>
+
 • Slide deck integration: renderDossierSlideCharts(idx) renders slide 7
   (archetype distribution bar + top-8 players by debit) and slide 8
   (top-8 operators by GGR + top-8 hold margins) from the embedded index.
+
+</details>
+
+<details>
+<summary><strong>Theme handling</strong></summary>
 
 • Theme handling: dossierTheme() reads getChartTheme() so charts follow the
   light/dark toggle; reinitAllCharts() disposes dossier charts and re-opens
   any dossier panel left open.
 
+</details>
+
+<details>
+<summary><strong>Requirements</strong></summary>
+
 • REQUIREMENT: dossier_chunks\ must sit next to bi_dashboard.html (and next
   to player_behavior_dashboard.html after step 12). Works when opened
   directly over file:// (script-tag loading is not CORS-blocked) or served
   over HTTP (python -m http.server).
+
+</details>
+
+<details>
+<summary><strong>Interface note</strong></summary>
 
 • INTERFACE NOTE: the existing dashboard generators and dossier.js still
   expect the aggregate all_players_index.json plus sibling dossier_chunks\
@@ -702,6 +747,11 @@ optional and disabled by default.
   all_players_index_XX.json and dossier_chunks_XX\ directories. An aggregate
   index/chunk assembly or dashboard loader update is required before these
   new per-export outputs can directly replace the existing dashboard inputs.
+
+</details>
+
+<details>
+<summary><strong>Monthly Activity Calendar</strong></summary>
 
 • Monthly Activity Calendar (NEW — added to Tab 6 dossier detail):
   - Interactive month calendar grid in player dossier panel showing active
@@ -714,6 +764,7 @@ optional and disabled by default.
   - Functions: initDossierCalendar, renderDossierCalendar,
     dossierCalendarPrevMonth, dossierCalendarNextMonth, openDayDetail,
     closeDayDetail, buildDayTimestampMap
+</details>
 
 
 
