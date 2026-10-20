@@ -104,7 +104,7 @@ winlose, formatted_debit_at, device_type, bet_id
 
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 graph TD
     A[August 2026/] --> B[.kilo/]
     A --> C[data/]
@@ -355,7 +355,7 @@ two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#ff0000', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     subgraph Build["Build Process (build_all_players_dossiers.py)"]
         Pass1[Pass 1: Stream & Aggregate]
@@ -530,7 +530,7 @@ flowchart TD
 
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
     raw_exports[("27 Raw Exports (data/raw/)")]
