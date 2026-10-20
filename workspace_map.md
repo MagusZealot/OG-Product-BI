@@ -334,8 +334,9 @@ two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
-    subgraph Build["Build Process (build_all_players_dossiers.py)"]
+    subgraph Build["Build Process (build_all_players_dossiers.py)]
         Pass1[Pass 1: Stream & Aggregate]
         Pass2[Pass 2: Build Trajectories]
     end
@@ -353,7 +354,6 @@ flowchart TD
     classDef build fill:#bbf,stroke:#333;
     classDef output fill:#bfb,stroke:#333;
     classDef raw fill:#f9f,stroke:#333,stroke-width:2px;
-    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 
     class Pass1,Pass2 build;
     class Index,Chunks output;
@@ -772,9 +772,10 @@ flowchart TD
 ### 6.3 Script-to-Output Dependency Graph
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Scripts grouped by layer
-    subgraph Ingestion["Ingestion Scripts"]
+    subgraph Ingestion["Ingestion"]
         S1[whale_tracking.py]
         S2[time_series_analysis.py]
         S3[chaser_detection.py]
@@ -785,7 +786,6 @@ flowchart TD
         S8[build_individual_dossiers.py]
         S13[probability_he_ingest.py]
         S15[round_dealer_table_time_ingest.py]
-    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
     end
 
     subgraph Prep["Dashboard Prep"]
