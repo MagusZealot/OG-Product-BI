@@ -533,7 +533,7 @@ flowchart TD
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
-    raw_exports[("27 Raw Exports (data\\raw\\))"]
+    raw_exports[("27 Raw Exports (data/raw/)")]
 
     subgraph ingestion_scripts["7 Ingestion Scripts"]
         whale[whale_tracking.py]
@@ -625,7 +625,7 @@ flowchart TD
 
     %% Probability & HE Flow
     subgraph ProbabilityFlow["Probability & HE Console Flow"]
-        mnt_game_probability_he[("mnt_game_probability_he_ YYYYMMDD.csv (data\\probability\\)")]
+        mnt_game_probability_he[("mnt_game_probability_he_ YYYYMMDD.csv (data/probability/)")]
         probability_he_ingest[probability_he_ingest.py]
         game_probability_he_data[game_probability_he_data.json]
         generate_probability_dashboard_html[generate_probability_dashboard_html.py]
@@ -638,7 +638,7 @@ flowchart TD
     generate_probability_dashboard_html --> game_probability_dashboard
 
     %% Runtime Note
-    runtime_note[["RUNTIME (browser): bi_dashboard.html embeds index + operator dossiers; player card click lazy-loads chunk_NNNN.js from dossier_chunks\\; 4 dashboards share dashboard-common.css"]]
+    runtime_note[["RUNTIME (browser): bi_dashboard.html embeds index + operator dossiers; player card click lazy-loads chunk_NNNN.js from dossier_chunks/ ; 4 dashboards share dashboard-common.css"]]
 
     bi_dashboard -.-> runtime_note
     dossier_enabled_behavior -.-> runtime_note
