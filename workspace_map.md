@@ -104,7 +104,7 @@ winlose, formatted_debit_at, device_type, bet_id
 
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#f5f6f7', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 graph TD
     A[August 2026/] --> B[.kilo/]
     A --> C[data/]
@@ -246,7 +246,7 @@ two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     subgraph Build["Build Process (build_all_players_dossiers.py)"]
         Pass1[Pass 1: Stream & Aggregate]
@@ -263,11 +263,13 @@ flowchart TD
     Index --> Pass2
     Pass2 --> Chunks
 
-    classDef build fill:#bbf,stroke:#333;
-    classDef output fill:#bfb,stroke:#333;
-    classDef raw fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef raw fill:#4a004a,stroke:#ff66ff,stroke-width:2px,color:#ffffff;
+    classDef script fill:#002244,stroke:#66aaff,stroke-width:1px,color:#ffffff;
+    classDef derived fill:#003300,stroke:#66ff66,stroke-width:1px,color:#ffffff;
+    classDef output fill:#444400,stroke:#ffff66,stroke-width:2px,color:#ffffff;
+    classDef runtime fill:#4a0000,stroke:#ff6666,stroke-width:2px,stroke-dasharray: 5 5,color:#ffffff;
 
-    class Pass1,Pass2 build;
+    class Pass1,Pass2 raw;
     class Index,Chunks output;
     class RawExports raw;
 ```
@@ -421,7 +423,7 @@ flowchart TD
 
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
     raw_exports[("27 Raw Exports (data/raw/)")]
@@ -535,11 +537,11 @@ flowchart TD
     dossier_enabled_behavior -.-> runtime_note
     game_probability_dashboard -.-> runtime_note
 
-    classDef raw fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef script fill:#bbf,stroke:#333,stroke-width:1px;
-    classDef derived fill:#bfb,stroke:#333,stroke-width:1px;
-    classDef output fill:#ff9,stroke:#333,stroke-width:2px;
-    classDef runtime fill:#f99,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef raw fill:#4a004a,stroke:#ff66ff,stroke-width:2px,color:#ffffff;
+    classDef script fill:#002244,stroke:#66aaff,stroke-width:1px,color:#ffffff;
+    classDef derived fill:#003300,stroke:#66ff66,stroke-width:1px,color:#ffffff;
+    classDef output fill:#444400,stroke:#ffff66,stroke-width:2px,color:#ffffff;
+    classDef runtime fill:#4a0000,stroke:#ff6666,stroke-width:2px,stroke-dasharray: 5 5,color:#ffffff;
 
     class raw_exports,mnt_game_probability_he raw;
     class whale,ts,chase,op,heatmap,behavior_ingest,dossier_build,prepare,gen_bi,gen_behavior,inject_dossier_tabs,probability_he_ingest,generate_probability_dashboard_html script;
@@ -622,7 +624,7 @@ argv is passed; each writes output\progress.json). Invoke with:
 ### 6.1 Dependency Graph
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     step1[Step 1: whale_tracking.py]
     step2[Step 2: time_series_analysis.py]
@@ -685,7 +687,7 @@ flowchart TD
 ### 6.3 Script-to-Output Dependency Graph
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Scripts grouped by layer
     subgraph Ingestion["Ingestion"]
@@ -774,15 +776,16 @@ flowchart TD
     O12 --> S16
     S16 --> O17
 
-    classDef script fill:#bbf,stroke:#333;
-    classDef prep fill:#ff9,stroke:#333;
-    classDef gen fill:#bff,stroke:#333;
-    classDef out fill:#bfb,stroke:#333;
+    classDef raw fill:#4a004a,stroke:#ff66ff,stroke-width:2px,color:#ffffff;
+    classDef script fill:#002244,stroke:#66aaff,stroke-width:1px,color:#ffffff;
+    classDef derived fill:#003300,stroke:#66ff66,stroke-width:1px,color:#ffffff;
+    classDef output fill:#444400,stroke:#ffff66,stroke-width:2px,color:#ffffff;
+    classDef runtime fill:#4a0000,stroke:#ff6666,stroke-width:2px,stroke-dasharray: 5 5,color:#ffffff;
 
     class S1,S2,S3,S4,S5,S6,S7,S8,S13,S15 script;
-    class S9 prep;
-    class S10,S11,S12,S14,S16 gen;
-    class O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12,O13,O14,O15,O16,O17 out;
+    class S9 script;
+    class S10,S11,S12,S14,S16 script;
+    class O1,O2,O3,O4,O5,O6,O7,O8,O9,O10,O11,O12,O13,O14,O15,O16,O17 script;
 ```
 
 ### 6.4 Features
