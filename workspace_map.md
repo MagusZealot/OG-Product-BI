@@ -106,7 +106,7 @@ winlose, formatted_debit_at, device_type, bet_id
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 graph TD
-    A["August 2026/"] --> B[.kilo/]
+    A[August 2026/] --> B[.kilo/]
     A --> C[data/]
     A --> D[scripts/]
     A --> E[src/]
@@ -118,7 +118,7 @@ graph TD
     C --> I[probability/]
     C --> J[round_dealer_time/]
     C --> K[round_table_time/]
-    C --> L["raw/"]
+    C --> L[raw/]
     
     I --> M[mnt_game_probability_he_YYYYMMDD.csv]
     I --> N[_manifest.json]
@@ -131,7 +131,7 @@ graph TD
     
     L --> S[2026-10-06-13-38-11_EXPORT_CSV_45625_808_0.csv]
     L --> T[2026-10-06-14-02-59_EXPORT_CSV_45627_085_0.csv]
-    L --> U["... (25 more, 2026-10-06 through 2026-10-07)"]
+    L --> U["... (25 more, 2026-10-06 through 2026-10-07) ..."]
     L --> V[2026-10-07-17-46-44_EXPORT_CSV_45680_721_0.csv]
     
     D --> W[generate_all_dashboards.py]
@@ -168,10 +168,10 @@ graph TD
     AW --> AX[nav_buttons.html]
     AW --> AY[tab_players.html]
     AW --> AZ[tab_operators.html]
-    AW --> ["slides.html"]
-    AW --> [dossier.js]
+    AW --> BA["slides.html"]
+    AW --> BB["dossier.js"]
     
-    A --> [workspace_map.md]
+    A --> BC["workspace_map.md"]
 ```
 
 <details>
