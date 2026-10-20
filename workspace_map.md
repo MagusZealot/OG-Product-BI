@@ -599,7 +599,7 @@ flowchart TD
     subgraph generate_dashboard_html["Main BI Console Generation"]
         gen_bi[generate_dashboard_html.py]
         sections["sections/* (nav, tabs, slides, dossier.js)"]
-        bi_dashboard[bi_dashboard.html (Oriental Gaming Title BI & Risk Intelligence Console)]
+        bi_dashboard["bi_dashboard.html (Oriental Gaming Title BI & Risk Intelligence Console)"]
     end
 
     dashboard_data --> gen_bi
