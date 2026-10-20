@@ -554,7 +554,7 @@ flowchart TD
         heatmap_csv[country_hourly_heatmap.csv]
         player_behavior_data[player_behavior_data.json]
         all_players_index[all_players_index_XX.json]
-        all_players_index_agg[all_players_index.json (aggregate)]
+        all_players_index_agg["all_players_index.json (aggregate)"]
         chunks_js[dossier_chunks_XX/*.js]
         individual_dossiers[individual_dossiers_data.json]
     end
