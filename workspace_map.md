@@ -355,7 +355,7 @@ two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#ff0000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     subgraph Build["Build Process (build_all_players_dossiers.py)"]
         Pass1[Pass 1: Stream & Aggregate]
