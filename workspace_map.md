@@ -300,7 +300,6 @@ via update_progress(stage, message, progress%, details) — {timestamp, stage,
 message, progress, details}. The standalone viewer.html polls this file.
 
 ### A. RAW-DATA INGESTION & ANALYSIS  (src/ingest/ — read data\raw\)
-•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 | Script | Step | Purpose | Key Output | Skip-Guard |
 |--------|------|---------|------------|------------|
@@ -317,7 +316,6 @@ message, progress, details}. The standalone viewer.html polls this file.
 | `inspect_behavior_metrics.py` / `sample_behavior_check.py` / `sample_profile_extractor.py` | — | Inspection utilities (stdout only) | stdout | N/A |
 | `advanced_analysis.py` | — | LEGACY monolith (steps 1-4 in one pass) | Same as steps 1-4 | N/A (not in pipeline) |
 ### B. DASHBOARD DATA PREPARATION  (src/dashboard/ — read output/, write output/)
-•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 | Script | Step | Purpose | Key Output | Skip-Guard |
 |--------|------|---------|------------|------------|
@@ -329,7 +327,6 @@ message, progress, details}. The standalone viewer.html polls this file.
 | `generate_probability_dashboard_html.py` | 14 | Probability & HE Console with trend tabs + date range | `game_probability_dashboard.html` | HTML newer than payload + generator |
 
 ### C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ — read output/)
-••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 | Script | Purpose | Key Output | Skip-Guard |
 |--------|---------|------------|------------|
@@ -358,6 +355,7 @@ two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
 ```mermaid
+```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     subgraph Build["Build Process (build_all_players_dossiers.py)]
@@ -383,6 +381,7 @@ flowchart TD
     class Index,Chunks output;
     class RawExports raw;
 ```
+
 
 <details>
 <summary><strong>Embedded payload (bi_dashboard.html)</strong></summary>
