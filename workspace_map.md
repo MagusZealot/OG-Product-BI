@@ -795,7 +795,7 @@ flowchart TD
 - **Missing script handling**: missing scripts are reported as `[SKIP]` and counted as failures
 - **Exit codes**: 0 = all steps OK, 1 = one or more failures (listed at the end)
 
-### 6.5 Why Steps 6 and 8 Are NOT Redundant
+### 6.5 Step 6 + Step 8
 
 - **Step 6 (build_all_players_dossiers.py)**: Processes each of the 27 exports separately → per-export compact indexes and lazy-loadable trajectory chunks, with file-level resume guards and no full history retained during index extraction. The optional merged dump is off unless `BUILD_DOSSIER_MONOLITH=1`.
 - **Step 8 (build_individual_dossiers.py)**: Reads only the first 5 exports + the derived CSVs (steps 1–4) → a curated set of 42 players and 35 operators with aggregated forensics (game mix, hourly load, device split, top players). No full trajectory. Powers the operator-dossier "Open" buttons and detailed player/operator profiles.
