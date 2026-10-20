@@ -1,13 +1,16 @@
-# Workspace Map — August 2026
+# Workspace Map — August 2026 {#workspace-map--august-2026}
+
 
 > **Project**: Oriental Gaming Title — BI & Risk Intelligence Pipeline  
 > **Scope**: Transaction-level analytics for **18.2M wagers** across **50,227 players** (27 exports, ~9.5 GB)  
 > **Outputs**: Generated artifacts in `output/` (excluded from Git)  
 > **Purpose**: Single source of truth for project structure, scripts, data flow, architecture, and recent changes
 
+
 ---
 
-## ⚠️ CRITICAL DATA SAFETY WARNING
+## ⚠️ CRITICAL DATA SAFETY WARNING {#critical-data-safety-warning}
+
 
 | Constraint | Details |
 |------------|---------|
@@ -38,22 +41,32 @@
 
 ---
 
-## Table of Contents
-
-- [0. Expected Columns & File Discovery](#0-expected-columns--file-discovery)
-- [1. Folder Tree Diagram](#1-folder-tree-diagram)
-- [2. Python Data Scripts & Parameters](#2-python-data-scripts--parameters)
-- [3. All-Players Dossier System — Architecture](#3-all-players-dossier-system--architecture)
-- [4. Data Flow Summary](#4-data-flow-summary)
-- [5. Currency Standardization](#5-currency-standardization)
-- [6. Master Pipeline Wrapper](#6-master-pipeline-wrapper)
-- [7. Recent Changes (2026-10-09)](#7-recent-changes-2026-10-09)
-- [8. Recent Update (2026-10-12)](#8-recent-update-2026-10-12)
-- [9. Recent Update (2026-10-13) — Probability & HE Console Trend Tabs](#9-recent-update-2026-10-13--probability--he-console-trend-tabs)
 
 ---
 
-## 0. Expected Columns & File Discovery
+## Table of Contents {#table-of-contents}
+
+- [0. Expected Columns & File Discovery](#0-expected-columns--file-discovery)
+- [1. Folder Tree Diagram](#1-folder-tree-diagram)
+- [2. PYTHON DATA SCRIPTS & PARAMETERS](#2-python-data-scripts--parameters)
+- [3. ALL-PLAYERS DOSSIER SYSTEM (Oriental Gaming Title BI & Risk Intelligence Console) — ARCHITECTURE](#3-all-players-dossier-system-oriental-gaming-title-bi--risk-intelligence-console--architecture)
+- [4. DATA FLOW SUMMARY](#4-data-flow-summary)
+- [5. CURRENCY STANDARDIZATION](#5-currency-standardization)
+- [6. MASTER PIPELINE WRAPPER (scripts/generate_all_dashboards.py)](#6-master-pipeline-wrapper-scriptsgenerate_all_dashboardspy)
+- [7. RECENT CHANGES (2026-10-09)](#7-recent-changes-2026-10-09)
+- [8. RECENT UPDATE (2026-10-12)](#8-recent-update-2026-10-12)
+- [9. RECENT UPDATE (2026-10-13) — PROBABILITY & HE CONSOLE TREND TABS](#9-recent-update-2026-10-13--probability--he-console-trend-tabs)
+- [10. RECENT UPDATE (2026-10-13) — PROBABILITY CONSOLE SHOWS ALL GAMES AT ONCE](#10-recent-update-2026-10-13--probability-console-shows-all-games-at-once)
+- [11. RECENT UPDATE (2026-10-13) — QUICK NAV + THRESHOLD BREACH ANALYTICS](#11-recent-update-2026-10-13--quick-nav-threshold-breach-analytics)
+- [12. RECENT UPDATE (2026-10-13) — STICKY HEADER FILTERS + BREACH CHARTS](#12-recent-update-2026-10-13--sticky-header-filters-breach-charts)
+- [13. RECENT UPDATE (2026-10-13) — HE TRENDS SPLIT PER GAME](#13-recent-update-2026-10-13--he-trends-split-per-game)
+- [14. RECENT UPDATE (2026-10-13) — UI CLEANUP: CONDITIONAL HE + BREACH CHARTS](#14-recent-update-2026-10-13--ui-cleanup-conditional-he-breach-charts)
+- [15. RECENT UPDATE (2026-10-15) — UNIFIED DEALER & TABLE PACE CONSOLE](#15-recent-update-2026-10-15--unified-dealer--table-pace-console)
+
+---
+
+## 0. Expected Columns & File Discovery {#0-expected-columns--file-discovery}
+
 
 ### Transaction Export Columns (`data/raw/*.csv`)
 
@@ -83,9 +96,12 @@ winlose, formatted_debit_at, device_type, bet_id
 
 > **Adding exports**: Place new CSVs in `data/raw/`; steps 1–6 discover them on next run. Steps 7–8 remain limited to five exports. Skip guards use file modification times.
 
+
+
 ---
 
-## 1. Folder Tree Diagram
+## 1. Folder Tree Diagram {#1-folder-tree-diagram}
+
 
 ```mermaid
 graph TD
@@ -301,7 +317,6 @@ August 2026/                                     (workspace root)
 
 </details>
 
----
 
  August 2026/                                     (workspace root)
  │
@@ -412,9 +427,11 @@ August 2026/                                     (workspace root)
  └── workspace_map.md                                (this file)
 
 
---------------------------------------------------------------------------------
-  2. PYTHON DATA SCRIPTS & PARAMETERS
---------------------------------------------------------------------------------
+
+---
+
+## 2. PYTHON DATA SCRIPTS & PARAMETERS {#2-python-data-scripts--parameters}
+
 
 NOTE: None of these scripts use argparse or accept command-line arguments.
 All paths are HARDCODED as module-level constants (FOLDER / REPORT_DIR / etc.).
@@ -426,7 +443,7 @@ PROGRESS TRACKING: every ingest/dashboard script writes output\progress.json
 via update_progress(stage, message, progress%, details) — {timestamp, stage,
 message, progress, details}. The standalone viewer.html polls this file.
 
-A. RAW-DATA INGESTION & ANALYSIS  (src/ingest/ — read data\raw\)
+### A. RAW-DATA INGESTION & ANALYSIS  (src/ingest/ — read data\raw\)
 ─────────────────────────────────────────────────────────────
 
 • whale_tracking.py            [pipeline step 1]
@@ -555,7 +572,7 @@ NOTE: post-regeneration (regenerate_summary_csvs.py) the CSV holds every
     process in a single pass over the exports. Retained for reference;
     NOT part of the 14-step pipeline. Same inputs/outputs as steps 1-4.
 
-B. DASHBOARD DATA PREPARATION  (src/dashboard/ — read output/, write output/)
+### B. DASHBOARD DATA PREPARATION  (src/dashboard/ — read output/, write output/)
 ───────────────────────────────────────────────────────────────────
   • prepare_dashboard_data.py          [pipeline step 9]
       Params: REPORT_DIR=output. Reads whale/chaser/hourly/time_series/
@@ -622,7 +639,7 @@ B. DASHBOARD DATA PREPARATION  (src/dashboard/ — read output/, write output/)
        Skip-guard: skipped when the HTML is newer than its JSON payload and
        generator; step 13 always refreshes the source data before this check.
 
-C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ — read output/)
+### C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ — read output/)
 ──────────────────────────────────────────────────────────────
   • inspect_all_stats.py        Params: REPORT_DIR=output. Prints summary stats.
   • inspect_operators.py        Params: csv_path=output\operator_performance.csv.
@@ -648,9 +665,11 @@ C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ — read output/)
       in the darkest band). Note: file currently not present in src/verify\.
 
 
---------------------------------------------------------------------------------
-  3. ALL-PLAYERS DOSSIER SYSTEM (Oriental Gaming Title BI & Risk Intelligence Console) — ARCHITECTURE
---------------------------------------------------------------------------------
+
+---
+
+## 3. ALL-PLAYERS DOSSIER SYSTEM (Oriental Gaming Title BI & Risk Intelligence Console) — ARCHITECTURE {#3-all-players-dossier-system-oriental-gaming-title-bi--risk-intelligence-console--architecture}
+
 
 GOAL: every one of the 50,227 players is browsable on the dashboard with
 their FULL round-by-round balance trajectory.
@@ -751,9 +770,11 @@ optional and disabled by default.
     closeDayDetail, buildDayTimestampMap
 
 
---------------------------------------------------------------------------------
-  4. DATA FLOW SUMMARY
---------------------------------------------------------------------------------
+
+---
+
+## 4. DATA FLOW SUMMARY {#4-data-flow-summary}
+
 
 27 raw exports (data\raw\)
     │
@@ -790,9 +811,11 @@ each player card click lazy-loads its chunk_NNNN.js from dossier_chunks\.
 The four dashboard HTML files link to one another via shared dashboard-common.css stylesheet.
 
 
---------------------------------------------------------------------------------
-  5. CURRENCY STANDARDIZATION
---------------------------------------------------------------------------------
+
+---
+
+## 5. CURRENCY STANDARDIZATION {#5-currency-standardization}
+
   All monetary amounts in the raw data are in various currencies (CNY, IDR, VND, KRW,
   JPY, THB, USD, SGD, HKD, TWD, MYR, INR, MMK, NPR, BDT, TRY, USDT, IDRK, VNDK).
   To enable accurate cross-player and cross-country analysis, ALL amounts are
@@ -821,9 +844,11 @@ The four dashboard HTML files link to one another via shared dashboard-common.cs
     ROI, and player archetypes are computed on PHP-standardized amounts.
 
 
---------------------------------------------------------------------------------
-  6. MASTER PIPELINE WRAPPER (scripts/generate_all_dashboards.py)
---------------------------------------------------------------------------------
+
+---
+
+## 6. MASTER PIPELINE WRAPPER (scripts/generate_all_dashboards.py) {#6-master-pipeline-wrapper-scriptsgenerate_all_dashboardspy}
+
 Runs the ENTIRE Oriental Gaming Title data pipeline in strict dependency order
 as standalone processes (each script uses hardcoded absolute paths, so no
 argv is passed; each writes output\progress.json). Invoke with:
@@ -891,9 +916,11 @@ run first. generate_dashboard_html.py (step 10) reads the outputs of steps
 6, 8, and 9, so those must precede it. inject_dossier_tabs.py (step 12) needs
 the step 8 output and the step 11 HTML.
 
-================================================================================
-  7. RECENT CHANGES (2026-10-09)
-================================================================================
+
+---
+
+## 7. RECENT CHANGES (2026-10-09) {#7-recent-changes-2026-10-09}
+
 
 Fixed data consistency and completeness issues identified during dashboard audit:
 
@@ -998,9 +1025,11 @@ Fixed data consistency and completeness issues identified during dashboard audit
        runnable on this machine), output/player_behavior_dashboard.html
        (regenerated via inject_dossier_tabs.py)
 
-================================================================================
-  8. RECENT UPDATE (2026-10-12)
-================================================================================
+
+---
+
+## 8. RECENT UPDATE (2026-10-12) {#8-recent-update-2026-10-12}
+
 
 1. PIPELINE LOCATION
    - The 14-step master wrapper is scripts/generate_all_dashboards.py (not the
@@ -1017,9 +1046,11 @@ Fixed data consistency and completeness issues identified during dashboard audit
      and output/game_probability_dashboard.html from this cache/feed.
    - Cached CSV snapshots are each under 100 KB; inspect only as needed.
 
-================================================================================
-   9. RECENT UPDATE (2026-10-13) — PROBABILITY & HE CONSOLE TREND TABS
-==============================================================================
+
+---
+
+## 9. RECENT UPDATE (2026-10-13) — PROBABILITY & HE CONSOLE TREND TABS {#9-recent-update-2026-10-13--probability--he-console-trend-tabs}
+
 
 Consolidated the two selected-game trend charts on
 output/dashboards/game_probability_dashboard.html (generated by
@@ -1093,9 +1124,11 @@ output/dashboards/ is the sibling-linked console that users open (its nav links
 point at bi_dashboard.html / player_behavior_dashboard.html). Both were
 regenerated/synced.
 
-==============================================================================
-   10. RECENT UPDATE (2026-10-13) — PROBABILITY CONSOLE SHOWS ALL GAMES AT ONCE
-==============================================================================
+
+---
+
+## 10. RECENT UPDATE (2026-10-13) — PROBABILITY CONSOLE SHOWS ALL GAMES AT ONCE {#10-recent-update-2026-10-13--probability-console-shows-all-games-at-once}
+
 
 output\dashboards\game_probability_dashboard.html (generator:
 src\dashboard\generate_probability_dashboard_html.py, pipeline step 14) no
@@ -1150,9 +1183,11 @@ simultaneously, with a new combined aggregate section on top.
    the captions; reset restores full history; relationship scatter groups match
    the valid latest-day rows).
 
-==============================================================================
-   11. RECENT UPDATE (2026-10-13) — QUICK NAV + THRESHOLD BREACH ANALYTICS
-==============================================================================
+
+---
+
+## 11. RECENT UPDATE (2026-10-13) — QUICK NAV + THRESHOLD BREACH ANALYTICS {#11-recent-update-2026-10-13--quick-nav-threshold-breach-analytics}
+
 
 Follow-up to section 10 on output\dashboards\game_probability_dashboard.html
 (plus a supporting payload change from
@@ -1203,9 +1238,11 @@ src\ingest\probability_he_ingest.py, pipeline step 13).
    calendar/stacked-bar series and table totals reconcile with the payload for
    the 90-day window, "all" history, an August start date and reset).
 
-==============================================================================
-   12. RECENT UPDATE (2026-10-13) — STICKY HEADER FILTERS + BREACH CHARTS
-==============================================================================
+
+---
+
+## 12. RECENT UPDATE (2026-10-13) — STICKY HEADER FILTERS + BREACH CHARTS {#12-recent-update-2026-10-13--sticky-header-filters-breach-charts}
+
 
 Follow-up to sections 10-11 on
 output\dashboards\game_probability_dashboard.html (generator:
@@ -1256,9 +1293,11 @@ src\dashboard\generate_probability_dashboard_html.py; no payload change).
    with daily[].breaches for the 7-day, 90-day, custom-start and reset cases;
    previous per-game/quick-nav regressions still green).
 
-==============================================================================
-   13. RECENT UPDATE (2026-10-13) — HE TRENDS SPLIT PER GAME
-==============================================================================
+
+---
+
+## 13. RECENT UPDATE (2026-10-13) — HE TRENDS SPLIT PER GAME {#13-recent-update-2026-10-13--he-trends-split-per-game}
+
 
 Follow-up to section 12 on output\dashboards\game_probability_dashboard.html
 (generator: src\dashboard\generate_probability_dashboard_html.py; no payload
@@ -1292,9 +1331,11 @@ pair of axes.
    game's series; 90-day / "all" / start-date / reset cases all re-filter the
    per-game HE charts; breach and quick-nav regressions still green).
 
-==============================================================================
-   14. RECENT UPDATE (2026-10-13) — UI CLEANUP: CONDITIONAL HE + BREACH CHARTS
-==============================================================================
+
+---
+
+## 14. RECENT UPDATE (2026-10-13) — UI CLEANUP: CONDITIONAL HE + BREACH CHARTS {#14-recent-update-2026-10-13--ui-cleanup-conditional-he-breach-charts}
+
 
 Follow-up to section 13 on output\dashboards\game_probability_dashboard.html
 (generator: src\dashboard\generate_probability_dashboard_html.py; no payload
@@ -1342,11 +1383,12 @@ change).
    windows, stay sorted descending, and the byPlace height matches the filtered
    count).
 
-==============================================================================
 
-==============================================================================
-   15. RECENT UPDATE (2026-10-15) — UNIFIED DEALER & TABLE PACE CONSOLE
-==============================================================================
+
+---
+
+## 15. RECENT UPDATE (2026-10-15) — UNIFIED DEALER & TABLE PACE CONSOLE {#15-recent-update-2026-10-15--unified-dealer--table-pace-console}
+
 
 The master dashboard pipeline now uses one combined pace data source and one
 dashboard generator:
@@ -1408,5 +1450,4 @@ dashboard generator:
       Efficiency Matrix, Top/Bottom 10 Profiles, Individualized Dealer Dossier,
       Forensics Table)
 
-==============================================================================
 EOF
