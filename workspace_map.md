@@ -533,7 +533,7 @@ flowchart TD
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
-    raw_exports[(27 Raw Exports (data/raw/))]
+    raw_exports[("27 Raw Exports (data/raw/)")]
 
     subgraph ingestion_scripts[7 Ingestion Scripts]
         whale[whale_tracking.py]
