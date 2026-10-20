@@ -75,10 +75,10 @@ def build():
     # ── NAV BUTTONS ───────────────────────────────────────────────
     NAV_INJECT = """
           <button onclick="switchTab('players')" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-2">
-            <i class="fa-solid fa-user-secret text-amber-400"></i> 6. Player Dossiers
+            <i class="fa-solid fa-user-secret text-amber-400"></i> Player Dossiers
           </button>
           <button onclick="switchTab('operators')" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-2">
-            <i class="fa-solid fa-building-columns text-cyan-400"></i> 7. Operator Dossiers
+            <i class="fa-solid fa-building-columns text-cyan-400"></i> Operator Dossiers
           </button>"""
 
     with open(SRC_HTML, "r", encoding="utf-8") as f:
