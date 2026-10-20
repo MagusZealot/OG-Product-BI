@@ -367,7 +367,7 @@ flowchart TD
         Chunks[dossier_chunks_XX/chunk_NNNN.js]
     end
 
-    RawExports[(27 Raw Exports\n(data\\raw\\))] --> Pass1
+    RawExports[("27 Raw Exports\n(data\\raw\\)")] --> Pass1
     Pass1 --> Index
     Index --> Pass2
     Pass2 --> Chunks
@@ -535,7 +535,7 @@ flowchart TD
     %% Main Ingestion Flow
     raw_exports[(27 Raw Exports (data/raw/))]
 
-    subgraph ingestion_scripts["7 Ingestion Scripts"]
+    subgraph ingestion_scripts[7 Ingestion Scripts]
         whale[whale_tracking.py]
         ts[time_series_analysis.py]
         chase[chaser_detection.py]
