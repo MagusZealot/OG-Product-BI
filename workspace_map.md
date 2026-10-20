@@ -104,7 +104,7 @@ winlose, formatted_debit_at, device_type, bet_id
 
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#f5f6f7', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
 graph TD
     A[August 2026/] --> B[.kilo/]
     A --> C[data/]
