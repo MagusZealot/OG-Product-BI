@@ -625,7 +625,7 @@ flowchart TD
 
     %% Probability & HE Flow
     subgraph ProbabilityFlow["Probability & HE Console Flow"]
-        mnt_game_probability_he[(mnt_game_probability_he_ YYYYMMDD.csv (data/probability/))]
+        mnt_game_probability_he[("mnt_game_probability_he_ YYYYMMDD.csv (data/probability/)")]
         probability_he_ingest[probability_he_ingest.py]
         game_probability_he_data[game_probability_he_data.json]
         generate_probability_dashboard_html[generate_probability_dashboard_html.py]
