@@ -971,68 +971,89 @@ as standalone processes (each script uses hardcoded absolute paths, so no
 argv is passed; each writes output\progress.json). Invoke with:
     py scripts\generate_all_dashboards.py
 
-  [1/14]  whale_tracking.py          -> whale_analysis.csv
-  [2/14]  time_series_analysis.py    -> time_series_analysis.csv + hourly_traffic.csv
-  [3/14]  chaser_detection.py        -> chaser_detection.csv
-  [4/14]  operator_analysis.py       -> operator_performance.csv
-  [5/14]  generate_heatmap_matrix.py -> country_hourly_heatmap.csv
-  [6/14]  build_all_players_dossiers.py -> all_players_index_XX.json +
-                                           dossier_chunks_XX/chunk_NNNN.js
-                                           (optional all_players_dossiers_XX.json;
-                                            BUILD_DOSSIER_MONOLITH=1)
-                                           NEW: chunks now include timestamps[]
-                                           array for Monthly Activity Calendar
-  [7/14]  generate_player_behavior_data.py -> player_behavior_data.json
-  [8/14]  build_individual_dossiers.py -> individual_dossiers_data.json
-                                           (42 players + 35 operators, curated)
-  [9/14]  prepare_dashboard_data.py  -> dashboard_data.json (master BI payload)
-  [10/14] generate_dashboard_html.py -> bi_dashboard.html (Main BI Console)
-  [11/14] generate_behavior_dashboard_html.py -> player_behavior_dashboard.html
-  [12/14] inject_dossier_tabs.py     -> injects dossier system into behavior console
-  [13/14] probability_he_ingest.py   -> game_probability_he_data.json (refresh/backfill)
-  [14/14] generate_probability_dashboard_html.py -> game_probability_dashboard.html
+### 6.1 Dependency Graph
 
-  [15/15] round_dealer_table_time_ingest.py -> round_dealer_table_time_data.json
-  [16/16] generate_round_dealer_table_time_dashboard_html.py -> round_dealer_table_time_dashboard.html
+```mermaid
+flowchart TD
+    step1[Step 1: whale_tracking.py]
+    step2[Step 2: time_series_analysis.py]
+    step3[Step 3: chaser_detection.py]
+    step4[Step 4: operator_analysis.py]
+    step5[Step 5: generate_heatmap_matrix.py]
+    step6[Step 6: build_all_players_dossiers.py]
+    step7[Step 7: generate_player_behavior_data.py]
+    step8[Step 8: build_individual_dossiers.py]
+    step9[Step 9: prepare_dashboard_data.py]
+    step10[Step 10: generate_dashboard_html.py]
+    step11[Step 11: generate_behavior_dashboard_html.py]
+    step12[Step 12: inject_dossier_tabs.py]
+    step13[Step 13: probability_he_ingest.py]
+    step14[Step 14: generate_probability_dashboard_html.py]
+    step15[Step 15: round_dealer_table_time_ingest.py]
+    step16[Step 16: generate_round_dealer_table_time_dashboard_html.py]
 
-Features:
-  - ProgressBar (bar + % + ETA) rendered to stdout as steps complete
-  - Skip-guards: steps are skipped when outputs exist and are newer than their
-    dependencies; the probability ingest always runs to find new snapshots:
-    * Steps 1-4: output CSVs exist and non-empty
-    * Step 5: country_hourly_heatmap.csv newer than all raw exports
-    * Step 6: all 27 per-export indexes + chunk sets newer than source exports
-    * Step 7: player_behavior_data.json newer than first 5 raw exports
-    * Step 8: individual_dossiers_data.json newer than whale/chaser/operator CSVs and first 5 exports
-    * Step 9: dashboard_data.json newer than all derived CSVs
-    * Step 10: bi_dashboard.html newer than dashboard_data.json, individual_dossiers_data.json, and all per-export indexes
-    * Step 11: player_behavior_dashboard.html newer than player_behavior_data.json
-    * Step 12: player_behavior_dashboard.html (post-injection) newer than all_players_index.json and individual_dossiers_data.json
-    * Step 13: always runs; uses cached files and checks/backfills source gaps
-    * Step 14: game_probability_dashboard.html newer than game_probability_he_data.json and its generator
-    * Step 15: round_dealer_table_time_data.json newer than its generator script
-    * Step 16: round_dealer_table_time_dashboard.html newer than the data payload and its generator
-  - Missing scripts are reported as [SKIP] and counted as failures
-  - Exit code 0 = all steps OK, 1 = one or more failures (listed at the end)
+    step1 --> step6
+    step2 --> step6
+    step3 --> step6
+    step4 --> step6
+    step5 --> step6
+    step1 --> step8
+    step2 --> step8
+    step3 --> step8
+    step4 --> step8
+    step5 --> step8
+    step6 --> step9
+    step8 --> step9
+    step9 --> step10
+    step7 --> step11
+    step11 --> step12
+    step13 --> step14
+    step15 --> step16
+    step8 --> step12
+```
 
-Steps 6 and 8 are NOT redundant:
-  • build_all_players_dossiers.py processes each of the 27 exports separately
-    → per-export compact indexes and lazy-loadable trajectory chunks, with
-    file-level resume guards and no full history retained during index
-    extraction. The optional merged dump is off unless
-    BUILD_DOSSIER_MONOLITH=1.
-  • build_individual_dossiers.py reads only the first 5 exports + the derived
-    CSVs → a curated set of 42 players and 35 operators with aggregated
-    forensics (game mix, hourly load, device split, top players). No full
-    trajectory. Powers the operator-dossier "Open" buttons and detailed
-    player/operator profiles.
-  Both are required: generate_dashboard_html.py embeds BOTH payloads.
+### 6.2 Pipeline Steps Table
 
-Dependency note: steps 6 and 8 both consume the step 1-4 CSVs, so those must
-run first. generate_dashboard_html.py (step 10) reads the outputs of steps
-6, 8, and 9, so those must precede it. inject_dossier_tabs.py (step 12) needs
-the step 8 output and the step 11 HTML.
+| Step | Script | Output | Skip-Guard Condition |
+|------|--------|--------|---------------------|
+| 1 | whale_tracking.py | whale_analysis.csv | Output CSV exists and non-empty |
+| 2 | time_series_analysis.py | time_series_analysis.csv + hourly_traffic.csv | Both output CSVs exist and non-empty |
+| 3 | chaser_detection.py | chaser_detection.csv | Output CSV exists and non-empty |
+| 4 | operator_analysis.py | operator_performance.csv | Output CSV exists and non-empty |
+| 5 | generate_heatmap_matrix.py | country_hourly_heatmap.csv | CSV newer than all raw exports |
+| 6 | build_all_players_dossiers.py | all_players_index_XX.json + dossier_chunks_XX/chunk_NNNN.js | All 27 per-export indexes + chunk sets newer than source exports |
+| 7 | generate_player_behavior_data.py | player_behavior_data.json | JSON newer than sampled 5 raw exports |
+| 8 | build_individual_dossiers.py | individual_dossiers_data.json | JSON newer than whale/chaser/operator CSVs and first 5 exports |
+| 9 | prepare_dashboard_data.py | dashboard_data.json | JSON newer than all derived CSVs |
+| 10 | generate_dashboard_html.py | bi_dashboard.html | HTML newer than dashboard_data.json, individual_dossiers_data.json, and all per-export indexes |
+| 11 | generate_behavior_dashboard_html.py | player_behavior_dashboard.html | HTML newer than player_behavior_data.json |
+| 12 | inject_dossier_tabs.py | player_behavior_dashboard.html (updated) | HTML (post-injection) newer than all_players_index.json and individual_dossiers_data.json |
+| 13 | probability_he_ingest.py | game_probability_he_data.json | Always runs (no skip-guard) |
+| 14 | generate_probability_dashboard_html.py | game_probability_dashboard.html | HTML newer than game_probability_he_data.json and generator |
+| 15 | round_dealer_table_time_ingest.py | round_dealer_table_time_data.json | JSON newer than generator script |
+| 16 | generate_round_dealer_table_time_dashboard_html.py | round_dealer_table_time_dashboard.html | HTML newer than data payload and generator |
 
+### 6.3 Features
+
+- **ProgressBar** (bar + % + ETA) rendered to stdout as steps complete
+- **Skip-guards**: steps are skipped when outputs exist and are newer than their dependencies; the probability ingest (step 13) always runs to find new snapshots
+- **Missing script handling**: missing scripts are reported as `[SKIP]` and counted as failures
+- **Exit codes**: 0 = all steps OK, 1 = one or more failures (listed at the end)
+
+### 6.4 Why Steps 6 and 8 Are NOT Redundant
+
+- **Step 6 (build_all_players_dossiers.py)**: Processes each of the 27 exports separately → per-export compact indexes and lazy-loadable trajectory chunks, with file-level resume guards and no full history retained during index extraction. The optional merged dump is off unless `BUILD_DOSSIER_MONOLITH=1`.
+- **Step 8 (build_individual_dossiers.py)**: Reads only the first 5 exports + the derived CSVs (steps 1–4) → a curated set of 42 players and 35 operators with aggregated forensics (game mix, hourly load, device split, top players). No full trajectory. Powers the operator-dossier "Open" buttons and detailed player/operator profiles.
+- **Both are required**: `generate_dashboard_html.py` (step 10) embeds BOTH payloads.
+
+### 6.5 Dependency Notes
+
+- Steps 6 and 8 both consume the step 1–4 CSVs, so steps 1–4 must run first.
+- Step 10 reads the outputs of steps 6, 8, and 9, so those must precede it.
+- Step 12 needs the step 8 output (individual_dossiers_data.json) and the step 11 HTML (player_behavior_dashboard.html).
+- Step 9 reads all derived CSVs from steps 1–5.
+- Step 6 produces per-export indexes and chunks; step 8 produces curated dossiers.
+- Step 13 (probability ingest) always runs and has no skip-guard.
 
 ---
 
