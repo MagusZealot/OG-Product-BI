@@ -104,7 +104,7 @@ winlose, formatted_debit_at, device_type, bet_id
 
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
 graph TD
     A[August 2026/] --> B[.kilo/]
     A --> C[data/]
@@ -173,115 +173,6 @@ graph TD
     
     A --> BC["workspace_map.md"]
 ```
-
-<details>
-<summary><strong>ASCII tree (legacy reference)</strong></summary>
-
-```
-August 2026/                                     (workspace root)
-▲
-▼•• .kilo/                                       (Kilo agent config)
-▲   ▼•• .gitignore
-▲   •• kilo.jsonc
-▲
-▼•• data/
-    ▲   ▼•• probability/                                 (cached published game probability snapshots)
-    ▲   ▲   ▼•• mnt_game_probability_he_YYYYMMDD.csv
-    ▲   ▲   •• _manifest.json                           (scan range and unavailable dates)
-    ▲   ▼•• round_dealer_time/                            (cached daily dealer pace snapshots)
-    ▲   ▲   ▼•• mnt_round_dealer_time_daily_YYYYMMDD.csv
-    ▲   ▲   •• _manifest.json
-    ▲   ▼•• round_table_time/                             (cached daily table pace snapshots)
-    ▲   ▲   ▼•• mnt_round_table_time_daily_YYYYMMDD.csv
-    ▲   ▲   •• _manifest.json
-    ▲   •• raw/                                         (27 raw CSV exports — NAME ONLY)
-    ▲       ▼•• 2026-10-06-13-38-11_EXPORT_CSV_45625_808_0.csv
-    ▲       ▼•• 2026-10-06-14-02-59_EXPORT_CSV_45627_085_0.csv
-    ▲       ▼•• ... (25 more, 2026-10-06 through 2026-10-07) ...
-    ▲       •• 2026-10-07-17-46-44_EXPORT_CSV_45680_721_0.csv
-    ▲
-|-- scripts/ (pipeline entry point and chart helper)
-  |   |-- generate_all_dashboards.py (18-step master wrapper; section 6)
-  |   `-- generate_chart.js
-▼•• src/                                               (ALL Python data scripts)
-▲   ▼•• ingest/                                        (raw-data ingestion & analysis)
-▲   ▲   ▼•• advanced_analysis.py                       (LEGACY monolith: all 4 analyses in one process — superseded by the four split scripts below; kept for reference)
-▲   ▲   ▼•• whale_tracking.py                          (step 1: Pareto top-20% by debit)
-▲   ▲   ▼•• time_series_analysis.py                    (step 2: country peak-hour + hourly traffic)
-▲   ▲   ▼•• chaser_detection.py                        (step 3: problem-gambling flags)
-▲   ▲   ▼•• operator_analysis.py                       (step 4: operator profitability)
-▲   ▲   ▼•• generate_heatmap_matrix.py                 (step 5: country x 24h bet matrix)
-▲   ▲   ▼•• build_all_players_dossiers.py              (step 6: two-pass per-file index + trajectory chunks)
-▲   ▲   ▼•• generate_player_behavior_data.py           (step 7: behavior telemetry)
-▲   ▲   ▼•• build_individual_dossiers.py               (step 8: curated player/operator dossiers)
-▲   ▲   ▼•• probability_he_ingest.py                   (step 13: fetch/backfill daily probability snapshots)
-▲   ▲   ▼•• currency_converter.py                      (shared module: PHP conversion + country map)
-▲   ▲   ▼•• currency_cache.json                        (cached historical FX rates, 30-day TTL)
-▲   ▲   ▼•• inspect_behavior_metrics.py
-▲   ▲   ▼•• sample_behavior_check.py
-▲   ▲   •• sample_profile_extractor.py
-▲   ▼•• dashboard/                                     (dashboard data prep & rendering)
-▲   ▲   ▼•• prepare_dashboard_data.py                  (step 9: master BI payload)
-▲   ▲   ▼•• generate_dashboard_html.py                 (step 10: MAIN BI console)
-▲   ▲   ▼•• generate_behavior_dashboard_html.py        (step 11: behavior console)
-▲   ▲   ▼•• generate_probability_dashboard_html.py     (step 14: probability & HE console)
-▲   ▲   ▼•• inject_dossier_tabs.py                     (step 12: dossier tabs in behavior console)
-▲   ▲   ▼•• regenerate_summary_csvs.py                 (helper: regenerates whale/chaser CSVs from unified index for consistency)
-▲   ▲   •• sections/                                  (reusable HTML/JS components)
-▲   ▲       ▼•• nav_buttons.html                       (nav buttons for tabs 6 & 7)
-▲   ▲       ▼•• tab_players.html                       (Tab 6: ALL-player browser UI)
-▲   ▲       ▼•• tab_operators.html                     (Tab 7: operator dossiers UI)
-▲   ▲       ▼•• slides.html                            (presentation slides 7 & 8)
-▲   ▲       •• dossier.js                             (dossier module: index + chunk loader)
-▲   •• verify/                                        (inspection / verification)
-▲       ▼•• analyze_retention_transactions.py
-▲       ▼•• check_js_syntax.py
-▲       ▼•• inspect_all_stats.py
-▲       ▼•• inspect_operators.py
-▲       ▼•• link_dashboards.py
-▲       ▼•• update_generator.py
-▲       ▼•• verify_behavior_dashboard.py
-▲       •• verify_dashboard.py
-▲
-|-- output/ (generated artifacts)
-  |   |-- dashboards/
-  |   |   |-- dashboard-common.css   # Shared stylesheet (consistent look across all dashboards)
-  |   |   |-- bi_dashboard.html
-  |   |   |-- game_probability_dashboard.html
-  |   |   |-- player_behavior_dashboard.html
-  |   |   |-- round_dealer_table_time_dashboard.html
-  |   |   `-- viewer.html
-  |   |-- data/
-  |   |   |-- all_players_index.json
-  |   |   |-- all_players_index_00.json ... all_players_index_26.json
-  |   |   |-- dashboard_data.json
-  |   |   |-- game_probability_he_data.json
-  |   |   |-- individual_dossiers_data.json
-  |   |   |-- player_behavior_data.json
-  |   |   `-- round_dealer_table_time_data.json
-  |   |-- dossiers/
-  |   |   `-- all_players_dossiers_00.json ... all_players_dossiers_26.json
-  |   |-- chunks/
-  |   |   |-- dossier_chunks/                            (aggregate chunks; chunk_0000.js ... chunk_0050.js)
-  |   |   |-- dossier_chunks_00/ ... dossier_chunks_26/  (per-export chunks)
-  |   |-- progress/
-  |   |   `-- progress.json
-  |   `-- reports/
-  |       |-- chaser_detection.csv
-  |       |-- country_hourly_heatmap.csv
-  |       |-- hourly_traffic.csv
-  |       |-- operator_performance.csv
-  |       |-- time_series_analysis.csv
-  |       `-- whale_analysis.csv
-  |
-▼•• docs/
-▲   •• analysis_log.txt                               (run log)
-▲
-▼•• analysis_reports/                                (LEGACY/EMPTY — outputs moved to output/)
-•• workspace_map.md                                (this file)
-```
-
-</details>
 
 
 ---
@@ -355,7 +246,7 @@ two. Time-ordered sequences bypass sorting. Per-export merged dumps are
 optional and disabled by default.
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     subgraph Build["Build Process (build_all_players_dossiers.py)"]
         Pass1[Pass 1: Stream & Aggregate]
@@ -530,7 +421,7 @@ flowchart TD
 
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
     raw_exports[("27 Raw Exports (data/raw/)")]
@@ -731,7 +622,7 @@ argv is passed; each writes output\progress.json). Invoke with:
 ### 6.1 Dependency Graph
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     step1[Step 1: whale_tracking.py]
     step2[Step 2: time_series_analysis.py]
@@ -794,7 +685,7 @@ flowchart TD
 ### 6.3 Script-to-Output Dependency Graph
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryBorderColor': '#475569', 'lineColor': '#94a3b8', 'textColor': '#f8fafc', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Scripts grouped by layer
     subgraph Ingestion["Ingestion"]
