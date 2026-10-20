@@ -533,7 +533,7 @@ flowchart TD
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryShapeFill': '#000000', 'fontFamily': 'sans-serif' }}}%%
 flowchart TD
     %% Main Ingestion Flow
-    raw_exports[("27 Raw Exports (data/raw/)")]
+    raw_exports[(27 Raw Exports (data/raw/))]
 
     subgraph ingestion_scripts["7 Ingestion Scripts"]
         whale[whale_tracking.py]
@@ -613,7 +613,7 @@ flowchart TD
         gen_behavior[generate_behavior_dashboard_html.py]
         player_behavior_dashboard[player_behavior_dashboard.html]
         inject_dossier_tabs[inject_dossier_tabs.py]
-        dossier_enabled_behavior[("dossier-enabled player_behavior_dashboard.html")]
+        dossier_enabled_behavior[(dossier-enabled player_behavior_dashboard.html)]
     end
 
     player_behavior_data --> gen_behavior
@@ -625,7 +625,7 @@ flowchart TD
 
     %% Probability & HE Flow
     subgraph ProbabilityFlow["Probability & HE Console Flow"]
-        mnt_game_probability_he[("mnt_game_probability_he_ YYYYMMDD.csv (data/probability/)")]
+        mnt_game_probability_he[(mnt_game_probability_he_ YYYYMMDD.csv (data/probability/))]
         probability_he_ingest[probability_he_ingest.py]
         game_probability_he_data[game_probability_he_data.json]
         generate_probability_dashboard_html[generate_probability_dashboard_html.py]
