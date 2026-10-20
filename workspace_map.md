@@ -908,34 +908,59 @@ RUNTIME (browser): `bi_dashboard.html` embeds the index + operator dossiers; eac
 
 ## 5. CURRENCY STANDARDIZATION {#5-currency-standardization}
 
-  All monetary amounts in the raw data are in various currencies (CNY, IDR, VND, KRW,
-  JPY, THB, USD, SGD, HKD, TWD, MYR, INR, MMK, NPR, BDT, TRY, USDT, IDRK, VNDK).
-  To enable accurate cross-player and cross-country analysis, ALL amounts are
-  converted to PHP (Philippine Peso) using date-relative historical exchange rates.
+All monetary amounts in the raw data are in various currencies. To enable accurate cross-player and cross-country analysis, **ALL amounts are converted to PHP (Philippine Peso)** using date-relative historical exchange rates.
 
-  • Module: src/ingest/currency_converter.py
-    - Fetches historical rates from frankfurter.app API (no API key required)
-    - Caches rates to disk (currency_cache.json) with 30-day TTL
-    - convert_to_php(amount, currency, date_str): Converts using date-specific rate
-    - get_country(currency): Maps currency to country (consistent across scripts)
-    - Rate fallback: Uses BASE_RATES when API unavailable or currency unsupported
-    - Unsupported currencies (VND, TWD, MMK, NPR, BDT): Uses base fallback rates
+### 5.1 Currencies in Raw Data (19 Total)
 
-  • Scripts updated to use currency conversion:
-    - whale_tracking.py: whale debit totals (PHP)
-    - time_series_analysis.py: country mapping (uses CURRENCY_COUNTRY)
-    - chaser_detection.py: loss streaks and spike multipliers (PHP)
-    - operator_analysis.py: operator ROI and GGR (PHP)
-    - build_all_players_dossiers.py: All player trajectories, balance series, P&L
-    - generate_player_behavior_data.py: Game stats, hourly timing, bet brackets
-    - generate_heatmap_matrix.py: Country mapping (uses get_country)
-    - build_individual_dossiers.py: Player/operator profiles, balances, P&L
+| Currency | Country/Region | Notes |
+|----------|----------------|-------|
+| CNY | China | Chinese Yuan |
+| IDR | Indonesia | Indonesian Rupiah |
+| VND | Vietnam | Vietnamese Dong (unsupported by API, uses base rate) |
+| KRW | South Korea | South Korean Won |
+| JPY | Japan | Japanese Yen |
+| THB | Thailand | Thai Baht |
+| USD | United States | US Dollar |
+| SGD | Singapore | Singapore Dollar |
+| HKD | Hong Kong | Hong Kong Dollar |
+| TWD | Taiwan | New Taiwan Dollar (unsupported by API, uses base rate) |
+| MYR | Malaysia | Malaysian Ringgit |
+| INR | India | Indian Rupee |
+| MMK | Myanmar | Myanmar Kyat (unsupported by API, uses base rate) |
+| NPR | Nepal | Nepalese Rupee (unsupported by API, uses base rate) |
+| BDT | Bangladesh | Bangladeshi Taka (unsupported by API, uses base rate) |
+| TRY | Turkey | Turkish Lira |
+| USDT | Crypto | Tether (treated as USD peg) |
+| IDRK | Indonesia (alt) | Alternate IDR code variant |
+| VNDK | Vietnam (alt) | Alternate VND code variant |
 
-  • Output impact: All derived CSVs, JSON files, and dashboards now reflect
-    PHP-normalized values. Whale thresholds, chaser spike multipliers, operator
-    ROI, and player archetypes are computed on PHP-standardized amounts.
+### 5.2 currency_converter.py Module Reference
 
+| Property | Detail |
+|----------|--------|
+| **cache file** | `src/ingest/currency_cache.json` (persisted JSON) |
+| **TTL** | 30 days (rates older than 30 days are re-fetched) |
+| **convert_to_php** | `convert_to_php(amount, currency, date_str)` — date-specific rate from frankfurter.app, memory + disk cached |
+| **get_country / CURRENCY_COUNTRY** | `get_country(currency)` / `CURRENCY_COUNTRY` dict — currency to country map, imported by every ingest script for consistent attribution |
+| **rate fallback** | Uses `BASE_RATES` when API unavailable or currency unsupported by frankfurter.app |
+| **unsupported currencies** | VND, TWD, MMK, NPR, BDT — never supported by API; always use base fallback rates |
 
+### 5.3 Script Currency Conversion Usage (8 Scripts)
+
+| Script | Conversion Usage |
+|--------|------------------|
+| `whale_tracking.py` | Whale debit totals converted to PHP for Pareto ranking |
+| `time_series_analysis.py` | Country mapping via `CURRENCY_COUNTRY` for hourly/country buckets |
+| `chaser_detection.py` | Loss streaks and spike multipliers computed in PHP |
+| `operator_analysis.py` | Operator ROI and GGR calculated on PHP-normalized amounts |
+| `build_all_players_dossiers.py` | All player trajectories, balance series, P&L in PHP |
+| `generate_player_behavior_data.py` | Game stats, hourly timing, bet brackets use PHP conversion |
+| `generate_heatmap_matrix.py` | Country mapping via `get_country()` for country x 24h matrix |
+| `build_individual_dossiers.py` | Player/operator profiles, balances, P&L in PHP |
+
+### 5.4 Output Impact
+
+**All derived CSVs, JSON files, and dashboards reflect PHP-normalized values.** Whale thresholds, chaser spike multipliers, operator ROI, and player archetypes are computed on PHP-standardized amounts. This ensures consistent cross-currency analysis across the entire BI pipeline.
 
 ---
 
