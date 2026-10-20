@@ -1,7 +1,7 @@
-﻿# Workspace Map â€” August 2026 {#workspace-map--august-2026}
+﻿# Workspace Map — August 2026 {#workspace-map--august-2026}
 
 
-> **Project**: Oriental Gaming Title â€” BI & Risk Intelligence Pipeline  
+> **Project**: Oriental Gaming Title — BI & Risk Intelligence Pipeline  
 > **Scope**: Transaction-level analytics for **18.2M wagers** across **50,227 players** (27 exports, ~9.5 GB)  
 > **Outputs**: Generated artifacts in `output/` (excluded from Git)  
 > **Purpose**: Single source of truth for project structure, scripts, data flow, architecture, and recent changes
@@ -15,7 +15,7 @@
  > | Constraint | Details |
  > |------------|---------|
  > | **Dataset size** | ~17M rows (18,275,592 wagers) across 27 raw CSV exports |
- > | **File sizes** | Each export: 300â€“377 MB (~9.5 GB total) in `data\raw\` |
+ > | **File sizes** | Each export: 300–377 MB (~9.5 GB total) in `data\raw\` |
  > | **AI restriction** | **NEVER** open, read, scan, or process raw exports or any file > 100 KB |
  > | **Large files** | Listed by **NAME ONLY** in this document |
  > | **Inspection** | ONLY via Python scripts that print small summaries |
@@ -49,14 +49,14 @@
  - [0. Expected Columns & File Discovery](#expected-columns-file-discovery)
  - [1. Folder Tree Diagram](#folder-tree-diagram)
  - [2. Python Data Scripts & Parameters](#python-data-scripts-parameters)
- - [3. All-Players Dossier System â€” Architecture](#dossier-system-architecture)
+ - [3. All-Players Dossier System — Architecture](#dossier-system-architecture)
  - [4. Data Flow Summary](#data-flow-summary)
  - [5. Currency Standardization](#currency-standardization)
  - [6. Master Pipeline Wrapper](#master-pipeline)
  - [7. Recent Changes](#recent-changes)
  - [8. Pipeline Location & Probability Cache](#pipeline-location-probability-cache)
  - [9. Probability & HE Console Trend Tabs](#probability-he-trend-tabs)
- - [10. Probability Console â€” All Games](#probability-all-games)
+ - [10. Probability Console — All Games](#probability-all-games)
  - [11. Quick Nav + Threshold Breach Analytics](#quick-nav-breach-analytics)
  - [12. Sticky Header Filters + Breach Charts](#sticky-header-breach-charts)
  - [13. HE Trends Split Per Game](#he-trends-split-per-game)
@@ -87,14 +87,14 @@ winlose, formatted_debit_at, device_type, bet_id
 
 | Step(s) | Pattern | Scope |
 |---------|---------|-------|
-| 1â€“5 | `*.csv` in `data/raw/` | All matching files |
+| 1–5 | `*.csv` in `data/raw/` | All matching files |
 | 6 | `*EXPORT_CSV*.csv` in `data/raw/` | Each file independently |
 | 7 | Random 5 `*EXPORT_CSV*.csv` | 5 sampled exports (`random.sample`) |
 | 8 | First 5 exports + derived CSVs | First 5 exports only |
 | 13 | `mnt_game_probability_he_YYYYMMDD.csv` | All daily snapshots |
 | 15 | `round_dealer_time/` + `round_table_time/` | All available snapshots |
 
-> **Adding exports**: Place new CSVs in `data/raw/`; steps 1â€“6 discover them on next run. Steps 7â€“8 remain limited to five exports. Skip guards use file modification times.
+> **Adding exports**: Place new CSVs in `data/raw/`; steps 1–6 discover them on next run. Steps 7–8 remain limited to five exports. Skip guards use file modification times.
 
 
 
@@ -114,70 +114,70 @@ graph TD
 
 ```
 August 2026/                                     (workspace root)
-â”‚
-â”œâ”€â”€ .kilo/                                       (Kilo agent config)
-â”‚   â”œâ”€â”€ .gitignore
-â”‚   â””â”€â”€ kilo.jsonc
-â”‚
-â”œâ”€â”€ data/
-    â”‚   â”œâ”€â”€ probability/                                 (cached published game probability snapshots)
-    â”‚   â”‚   â”œâ”€â”€ mnt_game_probability_he_YYYYMMDD.csv
-    â”‚   â”‚   â””â”€â”€ _manifest.json                           (scan range and unavailable dates)
-    â”‚   â”œâ”€â”€ round_dealer_time/                            (cached daily dealer pace snapshots)
-    â”‚   â”‚   â”œâ”€â”€ mnt_round_dealer_time_daily_YYYYMMDD.csv
-    â”‚   â”‚   â””â”€â”€ _manifest.json
-    â”‚   â”œâ”€â”€ round_table_time/                             (cached daily table pace snapshots)
-    â”‚   â”‚   â”œâ”€â”€ mnt_round_table_time_daily_YYYYMMDD.csv
-    â”‚   â”‚   â””â”€â”€ _manifest.json
-    â”‚   â””â”€â”€ raw/                                         (27 raw CSV exports â€” NAME ONLY)
-    â”‚       â”œâ”€â”€ 2026-10-06-13-38-11_EXPORT_CSV_45625_808_0.csv
-    â”‚       â”œâ”€â”€ 2026-10-06-14-02-59_EXPORT_CSV_45627_085_0.csv
-    â”‚       â”œâ”€â”€ ... (25 more, 2026-10-06 through 2026-10-07) ...
-    â”‚       â””â”€â”€ 2026-10-07-17-46-44_EXPORT_CSV_45680_721_0.csv
-    â”‚
+▲
+▼•• .kilo/                                       (Kilo agent config)
+▲   ▼•• .gitignore
+▲   •• kilo.jsonc
+▲
+▼•• data/
+    ▲   ▼•• probability/                                 (cached published game probability snapshots)
+    ▲   ▲   ▼•• mnt_game_probability_he_YYYYMMDD.csv
+    ▲   ▲   •• _manifest.json                           (scan range and unavailable dates)
+    ▲   ▼•• round_dealer_time/                            (cached daily dealer pace snapshots)
+    ▲   ▲   ▼•• mnt_round_dealer_time_daily_YYYYMMDD.csv
+    ▲   ▲   •• _manifest.json
+    ▲   ▼•• round_table_time/                             (cached daily table pace snapshots)
+    ▲   ▲   ▼•• mnt_round_table_time_daily_YYYYMMDD.csv
+    ▲   ▲   •• _manifest.json
+    ▲   •• raw/                                         (27 raw CSV exports — NAME ONLY)
+    ▲       ▼•• 2026-10-06-13-38-11_EXPORT_CSV_45625_808_0.csv
+    ▲       ▼•• 2026-10-06-14-02-59_EXPORT_CSV_45627_085_0.csv
+    ▲       ▼•• ... (25 more, 2026-10-06 through 2026-10-07) ...
+    ▲       •• 2026-10-07-17-46-44_EXPORT_CSV_45680_721_0.csv
+    ▲
 |-- scripts/ (pipeline entry point and chart helper)
   |   |-- generate_all_dashboards.py (18-step master wrapper; section 6)
   |   `-- generate_chart.js
-â”œâ”€â”€ src/                                               (ALL Python data scripts)
-â”‚   â”œâ”€â”€ ingest/                                        (raw-data ingestion & analysis)
-â”‚   â”‚   â”œâ”€â”€ advanced_analysis.py                       (LEGACY monolith: all 4 analyses in one process â€” superseded by the four split scripts below; kept for reference)
-â”‚   â”‚   â”œâ”€â”€ whale_tracking.py                          (step 1: Pareto top-20% by debit)
-â”‚   â”‚   â”œâ”€â”€ time_series_analysis.py                    (step 2: country peak-hour + hourly traffic)
-â”‚   â”‚   â”œâ”€â”€ chaser_detection.py                        (step 3: problem-gambling flags)
-â”‚   â”‚   â”œâ”€â”€ operator_analysis.py                       (step 4: operator profitability)
-â”‚   â”‚   â”œâ”€â”€ generate_heatmap_matrix.py                 (step 5: country x 24h bet matrix)
-â”‚   â”‚   â”œâ”€â”€ build_all_players_dossiers.py              (step 6: two-pass per-file index + trajectory chunks)
-â”‚   â”‚   â”œâ”€â”€ generate_player_behavior_data.py           (step 7: behavior telemetry)
-â”‚   â”‚   â”œâ”€â”€ build_individual_dossiers.py               (step 8: curated player/operator dossiers)
-â”‚   â”‚   â”œâ”€â”€ probability_he_ingest.py                   (step 13: fetch/backfill daily probability snapshots)
-â”‚   â”‚   â”œâ”€â”€ currency_converter.py                      (shared module: PHP conversion + country map)
-â”‚   â”‚   â”œâ”€â”€ currency_cache.json                        (cached historical FX rates, 30-day TTL)
-â”‚   â”‚   â”œâ”€â”€ inspect_behavior_metrics.py
-â”‚   â”‚   â”œâ”€â”€ sample_behavior_check.py
-â”‚   â”‚   â””â”€â”€ sample_profile_extractor.py
-â”‚   â”œâ”€â”€ dashboard/                                     (dashboard data prep & rendering)
-â”‚   â”‚   â”œâ”€â”€ prepare_dashboard_data.py                  (step 9: master BI payload)
-â”‚   â”‚   â”œâ”€â”€ generate_dashboard_html.py                 (step 10: MAIN BI console)
-â”‚   â”‚   â”œâ”€â”€ generate_behavior_dashboard_html.py        (step 11: behavior console)
-â”‚   â”‚   â”œâ”€â”€ generate_probability_dashboard_html.py     (step 14: probability & HE console)
-â”‚   â”‚   â”œâ”€â”€ inject_dossier_tabs.py                     (step 12: dossier tabs in behavior console)
-â”‚   â”‚   â”œâ”€â”€ regenerate_summary_csvs.py                 (helper: regenerates whale/chaser CSVs from unified index for consistency)
-â”‚   â”‚   â””â”€â”€ sections/                                  (reusable HTML/JS components)
-â”‚   â”‚       â”œâ”€â”€ nav_buttons.html                       (nav buttons for tabs 6 & 7)
-â”‚   â”‚       â”œâ”€â”€ tab_players.html                       (Tab 6: ALL-player browser UI)
-â”‚   â”‚       â”œâ”€â”€ tab_operators.html                     (Tab 7: operator dossiers UI)
-â”‚   â”‚       â”œâ”€â”€ slides.html                            (presentation slides 7 & 8)
-â”‚   â”‚       â””â”€â”€ dossier.js                             (dossier module: index + chunk loader)
-â”‚   â””â”€â”€ verify/                                        (inspection / verification)
-â”‚       â”œâ”€â”€ analyze_retention_transactions.py
-â”‚       â”œâ”€â”€ check_js_syntax.py
-â”‚       â”œâ”€â”€ inspect_all_stats.py
-â”‚       â”œâ”€â”€ inspect_operators.py
-â”‚       â”œâ”€â”€ link_dashboards.py
-â”‚       â”œâ”€â”€ update_generator.py
-â”‚       â”œâ”€â”€ verify_behavior_dashboard.py
-â”‚       â””â”€â”€ verify_dashboard.py
-â”‚
+▼•• src/                                               (ALL Python data scripts)
+▲   ▼•• ingest/                                        (raw-data ingestion & analysis)
+▲   ▲   ▼•• advanced_analysis.py                       (LEGACY monolith: all 4 analyses in one process — superseded by the four split scripts below; kept for reference)
+▲   ▲   ▼•• whale_tracking.py                          (step 1: Pareto top-20% by debit)
+▲   ▲   ▼•• time_series_analysis.py                    (step 2: country peak-hour + hourly traffic)
+▲   ▲   ▼•• chaser_detection.py                        (step 3: problem-gambling flags)
+▲   ▲   ▼•• operator_analysis.py                       (step 4: operator profitability)
+▲   ▲   ▼•• generate_heatmap_matrix.py                 (step 5: country x 24h bet matrix)
+▲   ▲   ▼•• build_all_players_dossiers.py              (step 6: two-pass per-file index + trajectory chunks)
+▲   ▲   ▼•• generate_player_behavior_data.py           (step 7: behavior telemetry)
+▲   ▲   ▼•• build_individual_dossiers.py               (step 8: curated player/operator dossiers)
+▲   ▲   ▼•• probability_he_ingest.py                   (step 13: fetch/backfill daily probability snapshots)
+▲   ▲   ▼•• currency_converter.py                      (shared module: PHP conversion + country map)
+▲   ▲   ▼•• currency_cache.json                        (cached historical FX rates, 30-day TTL)
+▲   ▲   ▼•• inspect_behavior_metrics.py
+▲   ▲   ▼•• sample_behavior_check.py
+▲   ▲   •• sample_profile_extractor.py
+▲   ▼•• dashboard/                                     (dashboard data prep & rendering)
+▲   ▲   ▼•• prepare_dashboard_data.py                  (step 9: master BI payload)
+▲   ▲   ▼•• generate_dashboard_html.py                 (step 10: MAIN BI console)
+▲   ▲   ▼•• generate_behavior_dashboard_html.py        (step 11: behavior console)
+▲   ▲   ▼•• generate_probability_dashboard_html.py     (step 14: probability & HE console)
+▲   ▲   ▼•• inject_dossier_tabs.py                     (step 12: dossier tabs in behavior console)
+▲   ▲   ▼•• regenerate_summary_csvs.py                 (helper: regenerates whale/chaser CSVs from unified index for consistency)
+▲   ▲   •• sections/                                  (reusable HTML/JS components)
+▲   ▲       ▼•• nav_buttons.html                       (nav buttons for tabs 6 & 7)
+▲   ▲       ▼•• tab_players.html                       (Tab 6: ALL-player browser UI)
+▲   ▲       ▼•• tab_operators.html                     (Tab 7: operator dossiers UI)
+▲   ▲       ▼•• slides.html                            (presentation slides 7 & 8)
+▲   ▲       •• dossier.js                             (dossier module: index + chunk loader)
+▲   •• verify/                                        (inspection / verification)
+▲       ▼•• analyze_retention_transactions.py
+▲       ▼•• check_js_syntax.py
+▲       ▼•• inspect_all_stats.py
+▲       ▼•• inspect_operators.py
+▲       ▼•• link_dashboards.py
+▲       ▼•• update_generator.py
+▲       ▼•• verify_behavior_dashboard.py
+▲       •• verify_dashboard.py
+▲
 |-- output/ (generated artifacts)
   |   |-- dashboards/
   |   |   |-- dashboard-common.css   # Shared stylesheet (consistent look across all dashboards)
@@ -209,11 +209,11 @@ August 2026/                                     (workspace root)
   |       |-- time_series_analysis.csv
   |       `-- whale_analysis.csv
   |
-â”œâ”€â”€ docs/
-â”‚   â””â”€â”€ analysis_log.txt                               (run log)
-â”‚
-â”œâ”€â”€ analysis_reports/                                (LEGACY/EMPTY â€” outputs moved to output/)
-â””â”€â”€ workspace_map.md                                (this file)
+▼•• docs/
+▲   •• analysis_log.txt                               (run log)
+▲
+▼•• analysis_reports/                                (LEGACY/EMPTY — outputs moved to output/)
+•• workspace_map.md                                (this file)
 ```
 
 </details>
@@ -231,11 +231,11 @@ Run with: py <script.py>   (the `python` alias is a Microsoft Store stub;
 use the `py` launcher on this machine)
 
 PROGRESS TRACKING: every ingest/dashboard script writes output\progress.json
-via update_progress(stage, message, progress%, details) â€” {timestamp, stage,
+via update_progress(stage, message, progress%, details) — {timestamp, stage,
 message, progress, details}. The standalone viewer.html polls this file.
 
-### A. RAW-DATA INGESTION & ANALYSIS  (src/ingest/ â€” read data\raw\)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+### A. RAW-DATA INGESTION & ANALYSIS  (src/ingest/ — read data\raw\)
+•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 | Script | Step | Purpose | Key Output | Skip-Guard |
 |--------|------|---------|------------|------------|
@@ -248,11 +248,11 @@ message, progress, details}. The standalone viewer.html polls this file.
 | `generate_player_behavior_data.py` | 7 | Game stats, device split, bet brackets (5 sampled exports) | `player_behavior_data.json` | JSON newer than sampled exports |
 | `build_individual_dossiers.py` | 8 | Curated 42 player + 35 operator forensics profiles | `individual_dossiers_data.json` | JSON newer than CSVs + first 5 exports |
 | `probability_he_ingest.py` | 13 | Fetch/backfill daily probability/HE snapshots | `_manifest.json`, `game_probability_he_data.json` | Always runs (no skip-guard) |
-| `currency_converter.py` | â€” | Shared: PHP conversion + country map (30-day cache) | Module only (no file output) | N/A |
-| `inspect_behavior_metrics.py` / `sample_behavior_check.py` / `sample_profile_extractor.py` | â€” | Inspection utilities (stdout only) | stdout | N/A |
-| `advanced_analysis.py` | â€” | LEGACY monolith (steps 1-4 in one pass) | Same as steps 1-4 | N/A (not in pipeline) |
-### B. DASHBOARD DATA PREPARATION  (src/dashboard/ â€” read output/, write output/)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+| `currency_converter.py` | — | Shared: PHP conversion + country map (30-day cache) | Module only (no file output) | N/A |
+| `inspect_behavior_metrics.py` / `sample_behavior_check.py` / `sample_profile_extractor.py` | — | Inspection utilities (stdout only) | stdout | N/A |
+| `advanced_analysis.py` | — | LEGACY monolith (steps 1-4 in one pass) | Same as steps 1-4 | N/A (not in pipeline) |
+### B. DASHBOARD DATA PREPARATION  (src/dashboard/ — read output/, write output/)
+•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 | Script | Step | Purpose | Key Output | Skip-Guard |
 |--------|------|---------|------------|------------|
@@ -260,11 +260,11 @@ message, progress, details}. The standalone viewer.html polls this file.
 | `generate_dashboard_html.py` | 10 | MAIN BI Console: embeds payload + full dossier system | `bi_dashboard.html` (~10.6 MB) | HTML newer than payload + indexes |
 | `generate_behavior_dashboard_html.py` | 11 | Player Behavioral Intelligence Console | `player_behavior_dashboard.html` | HTML newer than behavior data |
 | `inject_dossier_tabs.py` | 12 | Injects dossier tabs into behavior dashboard | `player_behavior_dashboard.html` (updated) | HTML newer than index + dossiers |
-| `regenerate_summary_csvs.py` | â€” | Helper: regenerates whale/chaser CSVs from unified index | `whale_analysis.csv`, `chaser_detection.csv` | N/A (manual) |
+| `regenerate_summary_csvs.py` | — | Helper: regenerates whale/chaser CSVs from unified index | `whale_analysis.csv`, `chaser_detection.csv` | N/A (manual) |
 | `generate_probability_dashboard_html.py` | 14 | Probability & HE Console with trend tabs + date range | `game_probability_dashboard.html` | HTML newer than payload + generator |
 
-### C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ â€” read output/)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+### C. INSPECTION / VERIFICATION / UTILITY  (src/verify/ — read output/)
+••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
 | Script | Purpose | Key Output | Skip-Guard |
 |--------|---------|------------|------------|
@@ -280,13 +280,13 @@ message, progress, details}. The standalone viewer.html polls this file.
 
 ---
 
-## 3. All-Players Dossier System â€” Architecture {#dossier-system-architecture}
+## 3. All-Players Dossier System — Architecture {#dossier-system-architecture}
 
 
 GOAL: every one of the 50,227 players is browsable on the dashboard with
 their FULL round-by-round balance trajectory.
 
-BUILT BY: build_all_players_dossiers.py (step 6) â€” processes each export in
+BUILT BY: build_all_players_dossiers.py (step 6) — processes each export in
 two streaming passes. It writes a per-export compact index after pass one,
 then builds trajectories and writes that export's lazy-load chunks in pass
 two. Time-ordered sequences bypass sorting. Per-export merged dumps are
@@ -325,7 +325,7 @@ flowchart TD
 â€¢ Embedded payload (bi_dashboard.html, `<script id="dossier-raw-data">`):
     { meta: {total_players: 50227, total_rows: 18275592, files: 27,
              chunk_size: 1000, total_chunks: 51},
-      players: [50,227 compact index entries â€” id==array position==rank,
+      players: [50,227 compact index entries — id==array position==rank,
                 sorted by total debit desc],
       operators: [35 detailed operator dossiers] }
 
@@ -392,7 +392,7 @@ flowchart TD
 <details>
 <summary><strong>Entry points</strong></summary>
 
-â€¢ Entry points â€” every "Open" button resolves ANY of the 50,227 players:
+â€¢ Entry points — every "Open" button resolves ANY of the 50,227 players:
     - openPlayerDossierById(pid, contextTab): linear-finds pid in the index,
       switches to the players tab, opens the dossier. Called from the whale
       leaderboard, chaser registry, operator top-players table and the
@@ -446,11 +446,11 @@ flowchart TD
 <details>
 <summary><strong>Monthly Activity Calendar</strong></summary>
 
-â€¢ Monthly Activity Calendar (NEW â€” added to Tab 6 dossier detail):
+â€¢ Monthly Activity Calendar (NEW — added to Tab 6 dossier detail):
   - Interactive month calendar grid in player dossier panel showing active
     days (amber highlight + activity bar proportional to bet count)
   - Month navigation (prev/next buttons) with dynamic rendering
-  - Click any active day â†’ expands inline 24-hour breakdown (0:00â€“23:00)
+  - Click any active day → expands inline 24-hour breakdown (0:00–23:00)
     with per-hour bet counts; peak hour highlighted in red
   - Powered by new timestamps[] array in trajectory chunks (Unix seconds
     per round), added by build_all_players_dossiers.py Step 2
@@ -634,10 +634,10 @@ All monetary amounts in the raw data are in various currencies. To enable accura
 |----------|--------|
 | **cache file** | `src/ingest/currency_cache.json` (persisted JSON) |
 | **TTL** | 30 days (rates older than 30 days are re-fetched) |
-| **convert_to_php** | `convert_to_php(amount, currency, date_str)` â€” date-specific rate from frankfurter.app, memory + disk cached |
-| **get_country / CURRENCY_COUNTRY** | `get_country(currency)` / `CURRENCY_COUNTRY` dict â€” currency to country map, imported by every ingest script for consistent attribution |
+| **convert_to_php** | `convert_to_php(amount, currency, date_str)` — date-specific rate from frankfurter.app, memory + disk cached |
+| **get_country / CURRENCY_COUNTRY** | `get_country(currency)` / `CURRENCY_COUNTRY` dict — currency to country map, imported by every ingest script for consistent attribution |
 | **rate fallback** | Uses `BASE_RATES` when API unavailable or currency unsupported by frankfurter.app |
-| **unsupported currencies** | VND, TWD, MMK, NPR, BDT â€” never supported by API; always use base fallback rates |
+| **unsupported currencies** | VND, TWD, MMK, NPR, BDT — never supported by API; always use base fallback rates |
 
 ### 5.3 Script Currency Conversion Usage (8 Scripts)
 
@@ -840,16 +840,16 @@ flowchart TD
 
 ### 6.5 Why Steps 6 and 8 Are NOT Redundant
 
-- **Step 6 (build_all_players_dossiers.py)**: Processes each of the 27 exports separately â†’ per-export compact indexes and lazy-loadable trajectory chunks, with file-level resume guards and no full history retained during index extraction. The optional merged dump is off unless `BUILD_DOSSIER_MONOLITH=1`.
-- **Step 8 (build_individual_dossiers.py)**: Reads only the first 5 exports + the derived CSVs (steps 1â€“4) â†’ a curated set of 42 players and 35 operators with aggregated forensics (game mix, hourly load, device split, top players). No full trajectory. Powers the operator-dossier "Open" buttons and detailed player/operator profiles.
+- **Step 6 (build_all_players_dossiers.py)**: Processes each of the 27 exports separately → per-export compact indexes and lazy-loadable trajectory chunks, with file-level resume guards and no full history retained during index extraction. The optional merged dump is off unless `BUILD_DOSSIER_MONOLITH=1`.
+- **Step 8 (build_individual_dossiers.py)**: Reads only the first 5 exports + the derived CSVs (steps 1–4) → a curated set of 42 players and 35 operators with aggregated forensics (game mix, hourly load, device split, top players). No full trajectory. Powers the operator-dossier "Open" buttons and detailed player/operator profiles.
 - **Both are required**: `generate_dashboard_html.py` (step 10) embeds BOTH payloads.
 
 ### 6.6 Dependency Notes
 
-- Steps 6 and 8 both consume the step 1â€“4 CSVs, so steps 1â€“4 must run first.
+- Steps 6 and 8 both consume the step 1–4 CSVs, so steps 1–4 must run first.
 - Step 10 reads the outputs of steps 6, 8, and 9, so those must precede it.
 - Step 12 needs the step 8 output (individual_dossiers_data.json) and the step 11 HTML (player_behavior_dashboard.html).
-- Step 9 reads all derived CSVs from steps 1â€“5.
+- Step 9 reads all derived CSVs from steps 1–5.
 - Step 6 produces per-export indexes and chunks; step 8 produces curated dossiers.
 - Step 13 (probability ingest) always runs and has no skip-guard.
 
@@ -860,7 +860,7 @@ flowchart TD
 Fixed data consistency and completeness issues identified during dashboard audit (2026-10-09):
 
 <details>
-<summary><strong>1. FIXED: merge_per_file_dossiers()</strong> â€” Merged multi-file player trajectories (19,045 players)</summary>
+<summary><strong>1. FIXED: merge_per_file_dossiers()</strong> — Merged multi-file player trajectories (19,045 players)</summary>
 
 1. FIXED: merge_per_file_dossiers() in generate_dashboard_html.py
    - Previously: Only used first chunk's detail for each player (dropped multi-file trajectories)
@@ -869,7 +869,7 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>2. REGENERATED: Unified index and chunks</strong> â€” Correct totals for 50,227 players; Monthly Activity Calendar fixed</summary>
+<summary><strong>2. REGENERATED: Unified index and chunks</strong> — Correct totals for 50,227 players; Monthly Activity Calendar fixed</summary>
 
 2. REGENERATED: Unified index and chunks (all_players_index.json + dossier_chunks/)
    - Correct totals for all 50,227 players
@@ -878,7 +878,7 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>3. CREATED: regenerate_summary_csvs.py</strong> â€” Regenerates whale/chaser CSVs from unified index for consistency</summary>
+<summary><strong>3. CREATED: regenerate_summary_csvs.py</strong> — Regenerates whale/chaser CSVs from unified index for consistency</summary>
 
 3. CREATED: src/dashboard/regenerate_summary_csvs.py
    - Regenerates whale_analysis.csv and chaser_detection.csv from unified index
@@ -887,7 +887,7 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>4. FIXED: Whale/Chaser data consistency</strong> â€” 0 mismatches (was 20/20 whales, 10/10 chasers)</summary>
+<summary><strong>4. FIXED: Whale/Chaser data consistency</strong> — 0 mismatches (was 20/20 whales, 10/10 chasers)</summary>
 
 4. FIXED: Whale/Chaser data consistency (0 mismatches)
    - Before: 20/20 whales and 10/10 chasers mismatched (different aggregation pipelines)
@@ -895,14 +895,14 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>5. FIXED: whale_analysis.csv limited to top 20</strong> â€” VIP Whales tab now shows exactly 20 players</summary>
+<summary><strong>5. FIXED: whale_analysis.csv limited to top 20</strong> — VIP Whales tab now shows exactly 20 players</summary>
 
 5. FIXED: whale_analysis.csv limited to top 20
    - VIP Whales tab now shows exactly 20 players (was showing all 50,227)
 </details>
 
 <details>
-<summary><strong>6. ADDED: Whale Group Dossier in Tab 1</strong> â€” Aggregate KPIs, geo breakdown, archetypes, 5 insights</summary>
+<summary><strong>6. ADDED: Whale Group Dossier in Tab 1</strong> — Aggregate KPIs, geo breakdown, archetypes, 5 insights</summary>
 
 6. ADDED: Whale Group Dossier in Tab 1 (VIP Whales)
    - Aggregate KPI strip: Total Debit (7.27B), Total Wagers (123,924), Avg Session (0.74h), Countries (4), Casino Concentration (42.3%)
@@ -912,17 +912,17 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>7. ADDED: Chaser Group Dossier in Tab 2</strong> â€” Risk tiers, tilt analysis, 5 risk insights</summary>
+<summary><strong>7. ADDED: Chaser Group Dossier in Tab 2</strong> — Risk tiers, tilt analysis, 5 risk insights</summary>
 
 7. ADDED: Chaser Group Dossier in Tab 2 (Risk & Chasers)
    - Aggregate KPI strip: Total Debit (22.61B), Total Flagged (25,263), Net Losers (69.1%), Net P&L (-334.6M), Peak Spike (7,500x)
-   - Risk Tier Distribution: Extreme (â‰¥1000x: 5), Critical (100-999x: 240), High (20-99x: 1,850), Moderate (5-19x: 6,522), Low (<5x: 16,646)
+   - Risk Tier Distribution: Extreme (≥1000x: 5), Critical (100-999x: 240), High (20-99x: 1,850), Moderate (5-19x: 6,522), Low (<5x: 16,646)
    - Tilt Threshold Analysis: L1-L10 loss streak breakdown with L3 highlighted as PEAK trigger (11.2%)
    - 5 Key Risk Insights: loss-streak tipping point, financial destructiveness, extreme risk cohort, streak escalation, net winner anomaly
 </details>
 
 <details>
-<summary><strong>8. FIXED: "Loss Thresholds: The 'Tilt' Curve" chart</strong> â€” Streakâ‰¥3 filter, live denominator, correct markPoint</summary>
+<summary><strong>8. FIXED: "Loss Thresholds: The 'Tilt' Curve" chart</strong> — Streak≥3 filter, live denominator, correct markPoint</summary>
 
 8. FIXED: "Loss Thresholds: The 'Tilt' Curve" chart (Tab 2, initChaserTiltChart)
     - CHART SCOPE: now filters loss_streak_distribution to streak >= 3 before slicing; bars start at L3
@@ -932,7 +932,7 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>9. FIXED: "24-Hour Outcome Volume" chart</strong> â€” Removed stacking; independent win/loss/push lines</summary>
+<summary><strong>9. FIXED: "24-Hour Outcome Volume" chart</strong> — Removed stacking; independent win/loss/push lines</summary>
 
 9. FIXED: "24-Hour Outcome Volume: Wins, Losses & Pushes" chart (Tab 1, initTimingCharts)
      - BUG: All three series used `stack: 'Total'`, showing cumulative sums instead of true hourly counts
@@ -941,17 +941,17 @@ Fixed data consistency and completeness issues identified during dashboard audit
 </details>
 
 <details>
-<summary><strong>10. ADDED: Player Archetype Legend card in Tab 6</strong> â€” 13 archetypes with colors, descriptions, assignment rules</summary>
+<summary><strong>10. ADDED: Player Archetype Legend card in Tab 6</strong> — 13 archetypes with colors, descriptions, assignment rules</summary>
 
 10. ADDED: "Player Archetype Legend" card in Tab 6 (All Player Dossiers)
      - Purpose: explains every player label (VIP Whale, Low Chaser, etc.) so users understand assignment
      - 13-item grid with ARCHETYPE_COLORS and one-line descriptions from ARCHETYPE_DESC
-     - Footnote: assignment rule = Spike Multiplier + total volume; Chasers escalate after losses (spike â‰¥ 3x), Whales = top 0.4% by debit (~384M); dual flags possible
+     - Footnote: assignment rule = Spike Multiplier + total volume; Chasers escalate after losses (spike ≥ 3x), Whales = top 0.4% by debit (~384M); dual flags possible
      - Files: tab_players.html, dossier.js, inject_dossier_tabs.py, bi_dashboard.html, player_behavior_dashboard.html
 </details>
 
 <details>
-<summary><strong>11. ADDED: Clickable archetype toggle filter</strong> â€” Legend cards as buttons with AND-combined filtering</summary>
+<summary><strong>11. ADDED: Clickable archetype toggle filter</strong> — Legend cards as buttons with AND-combined filtering</summary>
 
 11. ADDED: Clickable archetype toggle filter on the legend cards
      - Each legend card is a button (cursor-pointer, Enter/Space, aria-pressed); toggles archetype into a Set
@@ -1047,7 +1047,7 @@ threshold, Latest bet-place relationship) are unchanged.
 
 3. VERIFICATION
    - JS syntax validated (node --check).
-   - Functional smoke test with a stubbed DOM/ECharts: 36/36 checks pass â€”
+   - Functional smoke test with a stubbed DOM/ECharts: 36/36 checks pass —
      all 5 ECharts instances still initialise, default tab state is correct,
      tab switching toggles panes/buttons/aria and resizes the target chart,
      date bounds come from meta, date range filters the trend series
@@ -1067,12 +1067,12 @@ regenerated/synced.
 
 ---
 
-## 2026-10-13 â€” Probability Console Shows All Games at Once## 10. Probability Console â€” All Games {#probability-all-games}
+## 2026-10-13 — Probability Console Shows All Games at Once## 10. Probability Console — All Games {#probability-all-games}
 
 
 output\dashboards\game_probability_dashboard.html (generator:
 src\dashboard\generate_probability_dashboard_html.py, pipeline step 14) no
-longer relies on the "Trend game" dropdown â€” every game type is displayed
+longer relies on the "Trend game" dropdown — every game type is displayed
 simultaneously, with a new combined aggregate section on top.
 
 1. REMOVED: <select id="gameFilter"> and its label from the .filters row. The
@@ -1080,11 +1080,11 @@ simultaneously, with a new combined aggregate section on top.
    detail". The .filters row keeps Trend window (#periodFilter), Start date,
    End date and the Reset range button.
 
-2. ADDED: "Combined Summary â€” all games" section at the top of the main grid:
+2. ADDED: "Combined Summary — all games" section at the top of the main grid:
    a wide header card (#combinedNote shows pooled row/bet-place counts, pooled
-   breach rate and the active range) plus two ECharts instances â€”
+   breach rate and the active range) plus two ECharts instances —
    #combinedHe (overall HE trend: pooled daily mean actual vs expected HE) and
-   #combinedProb (overall probability and threshold trend) â€” both built from
+   #combinedProb (overall probability and threshold trend) — both built from
    DATA.daily (per-day cross-game means). renderCombinedSummary() drives them.
 
 3. REPLACED: the tabbed trend panel (id="trendPanel", .trend-tabs /
@@ -1092,16 +1092,16 @@ simultaneously, with a new combined aggregate section on top.
    superseded by the per-game charts below; the unused trend-tab CSS was
    removed.
 
-4. ADDED: buildGameSections() â€” a JS loop over DATA.game_types that injects one
+4. ADDED: buildGameSections() — a JS loop over DATA.game_types that injects one
    <article class="card chart-card wide" id-free> per game into
    <div class="game-sections" id="gameSections"> (CSS display:contents so the
    articles participate directly in the 2-column .grid). Each section contains:
    - A dedicated <table> inside <div class="table-wrap">: a bold
-     .table-total row ("<GAME> â€” all bet places") with timeframe-filtered
+     .table-total row ("<GAME> — all bet places") with timeframe-filtered
      game-level means followed by one row per bet place from
      DATA.bet_places (full-history pooled means; the caption notes this).
-   - Two .chart-card charts inside a nested .grid: "HE trend â€” <GAME>"
-     (#gameHe-<i>) and "Probability and threshold trend â€” <GAME>"
+   - Two .chart-card charts inside a nested .grid: "HE trend — <GAME>"
+     (#gameHe-<i>) and "Probability and threshold trend — <GAME>"
      (#gameProb-<i>), series style matching the old trend charts (time axis,
      inside+slider dataZoom, smooth lines, dashed expected, dotted threshold).
    ECharts instances are registered in the gameCharts array.
@@ -1117,7 +1117,7 @@ simultaneously, with a new combined aggregate section on top.
    summary" table keeps the precomputed full-history means.
 
 6. VERIFICATION: node --check on the inline script; stubbed DOM/ECharts smoke
-   test â€” 39/39 checks pass (21 chart instances: 5 static + 16 per-game; 8
+   test — 39/39 checks pass (21 chart instances: 5 static + 16 per-game; 8
    per-game tables with 1 + bet-place rows each; window switch widens series
    and updates table days; date range filters the combined charts and updates
    the captions; reset restores full history; relationship scatter groups match
@@ -1129,7 +1129,7 @@ simultaneously, with a new combined aggregate section on top.
 
 ---
 
-## 2026-10-13 â€” Quick Nav + Threshold Breach Analytics## 11. Quick Nav + Threshold Breach Analytics {#quick-nav-breach-analytics}
+## 2026-10-13 — Quick Nav + Threshold Breach Analytics## 11. Quick Nav + Threshold Breach Analytics {#quick-nav-breach-analytics}
 
 
 Follow-up to section 10 on output\dashboards\game_probability_dashboard.html
@@ -1142,7 +1142,7 @@ src\ingest\probability_he_ingest.py, pipeline step 13).
    fills it from a "Jump to" label + links: #combinedPanel (Combined Summary),
    #breachAnalytics (Threshold Breach Analytics), one link per game, and
    #gameSummary (Game type summary). Each per-game article now carries a unique
-   anchor id (id="game-BACCARAT", â€¦) assigned by uniqueGameAnchor() â€”
+   anchor id (id="game-BACCARAT", â€¦) assigned by uniqueGameAnchor() —
    slugify() uppercases and hyphenates the name and a numeric suffix resolves
    the CLASSIC DT / Classic DT casing alias collision. html has
    scroll-behavior:smooth and article[id]{scroll-margin-top:140px} so jumps
@@ -1151,10 +1151,10 @@ src\ingest\probability_he_ingest.py, pipeline step 13).
 2. THRESHOLD BREACH ANALYTICS: new <article class="card chart-card wide"
    id="breachAnalytics"> directly below the Combined Summary block, holding a
    nested .grid with:
-   - #breachCalendar â€” ECharts calendar coordinate system + heatmap series of
+   - #breachCalendar — ECharts calendar coordinate system + heatmap series of
      daily breach counts (DATA.daily[].breaches) over the visible range, with a
      horizontal visualMap scaled to the worst day in view.
-   - #breachByDate â€” stacked bar chart, one stacked series per game type over
+   - #breachByDate — stacked bar chart, one stacked series per game type over
      billing-date categories, from the new series_breach_count payload field.
    - Two .table-wrap tables: "Number of times threshold exceeded by game type"
      (#breachByGameRows: breaches in view, share, days in view, breaches/day,
@@ -1175,7 +1175,7 @@ src\ingest\probability_he_ingest.py, pipeline step 13).
    #startDate or #endDate changes (inTimeframe = date range âˆ© trend window);
    #breachNote reports totals, days in view and the peak day.
 
-5. VERIFICATION: node --check; stubbed DOM/ECharts smoke test â€” 38/38 checks
+5. VERIFICATION: node --check; stubbed DOM/ECharts smoke test — 38/38 checks
    pass (23 chart instances: 7 static + 16 per-game; 11 quick-nav links all
    resolving to existing anchors; unique game ids incl. the DT alias pair;
    calendar/stacked-bar series and table totals reconcile with the payload for
@@ -1187,7 +1187,7 @@ src\ingest\probability_he_ingest.py, pipeline step 13).
 
 ---
 
-## 2026-10-13 â€” Sticky Header Filters + Breach Charts## 12. Sticky Header Filters + Breach Charts {#sticky-header-breach-charts}
+## 2026-10-13 — Sticky Header Filters + Breach Charts## 12. Sticky Header Filters + Breach Charts {#sticky-header-breach-charts}
 
 
 Follow-up to sections 10-11 on
@@ -1200,7 +1200,7 @@ src\dashboard\generate_probability_dashboard_html.py; no payload change).
      the hero and inside <header>, where header .filters { flex-basis: 100% }
      gives it its own separated row between the dashboard links and the
      quick-nav. The header now stacks: title + BI/Behavior links, time filters,
-     jump links â€” all pinned while scrolling. The hero keeps only the h2 +
+     jump links — all pinned while scrolling. The hero keeps only the h2 +
      intro paragraph. article[id]{scroll-margin-top} raised 140px -> 200px so
      anchor jumps still clear the taller header.
    - #periodFilter gained <option value="7">Latest 7 days</option> as the first
@@ -1224,15 +1224,15 @@ src\dashboard\generate_probability_dashboard_html.py; no payload change).
 
 3. LAYOUT REORDER FOR HIGH-PRIORITY METRICS
    - Top of the main grid: #combinedPanel header, then "Probability vs
-     expected probability and threshold" (#probCompare) â€” immediately below
-     the global KPIs â€” then #combinedHe, #combinedProb and #heCompare.
+     expected probability and threshold" (#probCompare) — immediately below
+     the global KPIs — then #combinedHe, #combinedProb and #heCompare.
    - #breachAnalytics follows, its first item now the betting-area chart
      (#breachByPlace), then the calendar (#breachCalendar), the stacked
      by-date bars (#breachByDate) and the by-game chart (#breachByGame).
    - Per-game sections, latest-day scatter and the full-history Game type
      summary table keep their positions after the breach section.
 
-4. VERIFICATION: node --check; stubbed DOM/ECharts smoke test â€” 28/28 checks
+4. VERIFICATION: node --check; stubbed DOM/ECharts smoke test — 28/28 checks
    pass (25 chart instances; filters + listeners inside the header; 7-day
    option present with 90 still default; both breach charts horizontal/vertical
    as specified, sorted, capped height, slider zoom; chart totals reconcile
@@ -1245,7 +1245,7 @@ src\dashboard\generate_probability_dashboard_html.py; no payload change).
 
 ---
 
-## 2026-10-13 â€” HE Trends Split Per Game## 13. HE Trends Split Per Game {#he-trends-split-per-game}
+## 2026-10-13 — HE Trends Split Per Game## 13. HE Trends Split Per Game {#he-trends-split-per-game}
 
 
 Follow-up to section 12 on output\dashboards\game_probability_dashboard.html
@@ -1253,7 +1253,7 @@ Follow-up to section 12 on output\dashboards\game_probability_dashboard.html
 change). Requested because the pooled HE line chart mixed all games on one
 pair of axes.
 
-1. REMOVED: the combined "Overall HE trend â€” all games" chart â€” its article,
+1. REMOVED: the combined "Overall HE trend — all games" chart — its article,
    the 'combinedHe' entry in chartIds and the charts.combinedHe.setOption block
    inside renderCombinedSummary(). No game-agnostic HE line chart remains; the
    dashboard no longer plots multiple game types on one HE trend axis.
@@ -1266,14 +1266,14 @@ pair of axes.
    "Threshold" (dotted). Per-game HE trend charts still follow the global
    timeframe (trend window âˆ© date range) via timeframeSeries().
 
-3. KEPT: heCompare ("Average actual vs expected HE by game") â€” it is a grouped
+3. KEPT: heCompare ("Average actual vs expected HE by game") — it is a grouped
    BAR comparison, not a trend line chart, so it does not overlap lines; it is
    now .wide to fill the Combined Summary row left open by the removed chart.
    Combined Summary order: header, probCompare (probability comparison),
-   combinedProb (pooled probability trend), heCompare â€” followed by Threshold
+   combinedProb (pooled probability trend), heCompare — followed by Threshold
    Breach Analytics.
 
-4. VERIFICATION: node --check; stubbed DOM/ECharts smoke test â€” 23/23 checks
+4. VERIFICATION: node --check; stubbed DOM/ECharts smoke test — 23/23 checks
    pass (24 chart instances: 8 static + 16 per-game; combinedHe never
    initialised and no setOption sent to it; every game section contains its own
    labelled "<GAME> - HE Trend" chart with exactly 2 series plotting only that
@@ -1286,14 +1286,14 @@ pair of axes.
 
 ---
 
-## 2026-10-13 â€” UI Cleanup: Conditional HE + Breach Charts## 14. UI Cleanup: Conditional HE + Breach Charts {#conditional-he-breach-charts}
+## 2026-10-13 — UI Cleanup: Conditional HE + Breach Charts## 14. UI Cleanup: Conditional HE + Breach Charts {#conditional-he-breach-charts}
 
 
 Follow-up to section 13 on output\dashboards\game_probability_dashboard.html
 (generator: src\dashboard\generate_probability_dashboard_html.py; no payload
 change).
 
-1. REMOVED: every per-game "Probability and threshold trend" chart â€” the second
+1. REMOVED: every per-game "Probability and threshold trend" chart — the second
    card of each game section (gameProb-<i> div, ECharts instance, setOption and
    the nested .grid that paired the two cards). Each game section is now a
    standard single-view container: heading, meta caption, table, then one
@@ -1315,19 +1315,19 @@ change).
 3. CONDITIONAL TABLE COLUMNS: the per-game <thead> is now built dynamically
    (gameHead-<i>). Games without usable HE data drop the "Actual HE",
    "Expected HE" and "HE delta" columns from the header AND from every row
-   (6-cell rows instead of 9) â€” BULL BULL (mean_actual_he null, 0/599 series
+   (6-cell rows instead of 9) — BULL BULL (mean_actual_he null, 0/599 series
    points, no HE model published) renders that way, and its meta caption notes
    "no house-edge model published for this game".
 
 4. ZERO-BREACH FILTERING: the two breach charts now filter before hitting
-   ECharts â€” byGame keeps only games with in-view breaches > 0 and byPlace only
+   ECharts — byGame keeps only games with in-view breaches > 0 and byPlace only
    betting areas with in-view breaches > 0 (axes, bars, labels, tooltips and
    the dynamic byPlace height all derive from the filtered arrays). Under the
    default 90-day window that is 5 games; under "all" dates 7 games (the
    zero-breach "Classic DT" alias drops out) and 61 of 111 betting areas.
    Tooltips still show full-history totals for the listed entries.
 
-5. VERIFICATION: node --check; stubbed DOM/ECharts smoke test â€” 30/30 checks
+5. VERIFICATION: node --check; stubbed DOM/ECharts smoke test — 30/30 checks
    pass (15 chart instances: 8 static + 7 per-game HE, BULL BULL skipped;
    wrapper visibility matches in-window HE points incl. the SICBO hide/reveal
    cases; BULL BULL 6-cell rows and 6-column head vs ROULETTE's 9; breach
@@ -1342,7 +1342,7 @@ change).
 
 ---
 
-## 2026-10-15 â€” Unified Dealer & Table Pace Console## 15. Unified Dealer & Table Pace Console {#dealer-table-console}
+## 2026-10-15 — Unified Dealer & Table Pace Console## 15. Unified Dealer & Table Pace Console {#dealer-table-console}
 
 
 The master dashboard pipeline now uses one combined pace data source and one
@@ -1376,31 +1376,31 @@ dashboard generator:
   Console features:
     - KPI strip: Global Average Pace, Selected Game Baseline, Average Std Dev,
       Active Fleet (dealer/table counts)
-    - Watchlist: Slow Dealers â€” dealers slower than the selected game's baseline
+    - Watchlist: Slow Dealers — dealers slower than the selected game's baseline
       by >= 1.50 s or in its slowest 10%, horizontal bar chart with color-coded
       severity and click-to-open dealer dossier
-    - Watchlist: High-Variance Shifts â€” rows where dealer's daily STD_TIMEDIFF
+    - Watchlist: High-Variance Shifts — rows where dealer's daily STD_TIMEDIFF
       exceeds 200% of its 30-day moving average, horizontal bar chart (top 30,
       dataZoom slider for the rest, dashed 2.0x threshold line); clicking a bar
       opens that dealer's dossier. Also rendered per-dealer inside each dealer
       dossier panel (top 20 of that dealer's shifts).
       (consistency) for all dealer+table profiles in the selected game
-    - Dealer Speed Over Time â€” daily baseline line plus up to five fastest and
+    - Dealer Speed Over Time — daily baseline line plus up to five fastest and
       five slowest dealer trend lines, with dataZoom and a dashed golden markLine
       labeled "Baseline Avg: X.XX s"
-    - Top / Bottom 10 Dealer & Table Profiles â€” horizontal bar chart ranked by
+    - Top / Bottom 10 Dealer & Table Profiles — horizontal bar chart ranked by
       average time, fastest in green, slowest in red
-    - Day-of-the-Week Volatility â€” highest/lowest bars highlighted in red/green
+    - Day-of-the-Week Volatility — highest/lowest bars highlighted in red/green
       for both AVG_TIMEDIFF and STD_TIMEDIFF series, with a centered color
       legend naming the extreme day and value for each series
-    - Individualized Dealer Dossier â€” card grid of dealers with KPIs and a
+    - Individualized Dealer Dossier — card grid of dealers with KPIs and a
       per-dealer trend chart (lazy-loaded on click). Filters: baseline
       (above/below), min days (14/30/60+), week-over-week (faster/slower/no-data),
       high-variance shifts (has / none). Clicking a card opens the dealer dossier
       panel with context-switching penalty and per-dealer high-variance shifts
-    - Forensics table â€” full telemetry listing with billing date, game type,
+    - Forensics table — full telemetry listing with billing date, game type,
       dealer, table no, avg time and std dev; paginated 100/page
-    - Jump to interface â€” sticky header nav with links to all sections
+    - Jump to interface — sticky header nav with links to all sections
       (KPIs, Day-of-Week Volatility, both watchlists, Dealer Speed Over Time,
       Efficiency Matrix, Top/Bottom 10 Profiles, Individualized Dealer Dossier,
       Forensics Table)
